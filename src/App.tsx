@@ -159,18 +159,18 @@ function App() {
         </header>
 
         <Tabs defaultValue="social" className="w-full">
-          <TabsList className="mb-6">
-            <TabsTrigger value="social" className="gap-2">
-              <ChatsCircle size={18} />
-              Social Media
+          <TabsList className="mb-6 w-full grid grid-cols-3 h-auto">
+            <TabsTrigger value="social" className="gap-1 sm:gap-2 flex-col sm:flex-row h-auto py-2 sm:py-1.5">
+              <ChatsCircle size={18} className="sm:size-4" />
+              <span className="text-xs sm:text-sm">Social Media</span>
             </TabsTrigger>
-            <TabsTrigger value="email" className="gap-2">
-              <Envelope size={18} />
-              Email Campaigns
+            <TabsTrigger value="email" className="gap-1 sm:gap-2 flex-col sm:flex-row h-auto py-2 sm:py-1.5">
+              <Envelope size={18} className="sm:size-4" />
+              <span className="text-xs sm:text-sm">Email Campaigns</span>
             </TabsTrigger>
-            <TabsTrigger value="staff" className="gap-2">
-              <Users size={18} />
-              Staff Culture
+            <TabsTrigger value="staff" className="gap-1 sm:gap-2 flex-col sm:flex-row h-auto py-2 sm:py-1.5">
+              <Users size={18} className="sm:size-4" />
+              <span className="text-xs sm:text-sm">Staff Culture</span>
             </TabsTrigger>
           </TabsList>
 
