@@ -54,8 +54,8 @@ export function PostCard({ post, onEdit, onDelete, client }: PostCardProps) {
                 <Badge variant="outline" className="text-xs font-medium">
                   {client?.name || 'Unknown Client'}
                 </Badge>
-                <Badge className={cn('text-xs', getStatusColor(post.status))}>
-                  {post.status.charAt(0).toUpperCase() + post.status.slice(1)}
+                <Badge className={cn('text-xs', getStatusColor(post.status || 'draft'))}>
+                  {(post.status || 'draft').charAt(0).toUpperCase() + (post.status || 'draft').slice(1)}
                 </Badge>
               </div>
               <div className="flex items-center gap-2">
