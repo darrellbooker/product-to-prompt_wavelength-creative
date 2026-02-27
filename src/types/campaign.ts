@@ -77,7 +77,8 @@ export interface ROICampaign {
     avatarUrl?: string
   }
   revenue?: number
-  conversions?: number
-  clicks?: number
+  totalSpend?: number
   impressions?: number
+  clicks?: number
+  conversions?: number
 }

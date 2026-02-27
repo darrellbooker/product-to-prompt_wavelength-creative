@@ -32,9 +32,10 @@ export function ROICampaignFormDialog({
     startDate: '',
     endDate: '',
     revenue: '',
-    conversions: '',
-    clicks: '',
+    totalSpend: '',
     impressions: '',
+    clicks: '',
+    conversions: '',
   })
 
   useEffect(() => {
@@ -47,9 +48,10 @@ export function ROICampaignFormDialog({
         startDate: format(new Date(editingCampaign.startDate), 'yyyy-MM-dd'),
         endDate: format(new Date(editingCampaign.endDate), 'yyyy-MM-dd'),
         revenue: editingCampaign.revenue?.toString() || '',
-        conversions: editingCampaign.conversions?.toString() || '',
-        clicks: editingCampaign.clicks?.toString() || '',
+        totalSpend: editingCampaign.totalSpend?.toString() || '',
         impressions: editingCampaign.impressions?.toString() || '',
+        clicks: editingCampaign.clicks?.toString() || '',
+        conversions: editingCampaign.conversions?.toString() || '',
       })
     } else {
       setFormData({
@@ -60,9 +62,10 @@ export function ROICampaignFormDialog({
         startDate: '',
         endDate: '',
         revenue: '',
-        conversions: '',
-        clicks: '',
+        totalSpend: '',
         impressions: '',
+        clicks: '',
+        conversions: '',
       })
     }
   }, [editingCampaign, open])
@@ -82,9 +85,10 @@ export function ROICampaignFormDialog({
       startDate: new Date(formData.startDate).toISOString(),
       endDate: new Date(formData.endDate).toISOString(),
       revenue: formData.revenue ? parseFloat(formData.revenue) : undefined,
-      conversions: formData.conversions ? parseInt(formData.conversions) : undefined,
-      clicks: formData.clicks ? parseInt(formData.clicks) : undefined,
+      totalSpend: formData.totalSpend ? parseFloat(formData.totalSpend) : undefined,
       impressions: formData.impressions ? parseInt(formData.impressions) : undefined,
+      clicks: formData.clicks ? parseInt(formData.clicks) : undefined,
+      conversions: formData.conversions ? parseInt(formData.conversions) : undefined,
     })
   }
 
@@ -194,32 +198,32 @@ export function ROICampaignFormDialog({
 
           <div className="border-t pt-4">
             <h4 className="text-sm font-semibold mb-3 text-muted-foreground uppercase tracking-wide">
-              Performance Metrics (Optional)
+              Results (Optional)
             </h4>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="revenue">Revenue ($)</Label>
+                <Label htmlFor="total-spend">Total Spend ($)</Label>
                 <Input
-                  id="revenue"
+                  id="total-spend"
                   type="number"
                   step="0.01"
                   min="0"
-                  value={formData.revenue}
-                  onChange={(e) => setFormData({ ...formData, revenue: e.target.value })}
-                  placeholder="7500.00"
+                  value={formData.totalSpend}
+                  onChange={(e) => setFormData({ ...formData, totalSpend: e.target.value })}
+                  placeholder="4800.00"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="conversions">Conversions</Label>
+                <Label htmlFor="impressions">Impressions</Label>
                 <Input
-                  id="conversions"
+                  id="impressions"
                   type="number"
                   min="0"
-                  value={formData.conversions}
-                  onChange={(e) => setFormData({ ...formData, conversions: e.target.value })}
-                  placeholder="150"
+                  value={formData.impressions}
+                  onChange={(e) => setFormData({ ...formData, impressions: e.target.value })}
+                  placeholder="50000"
                 />
               </div>
 
@@ -236,17 +240,73 @@ export function ROICampaignFormDialog({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="impressions">Impressions</Label>
+                <Label htmlFor="conversions">Conversions</Label>
                 <Input
-                  id="impressions"
+                  id="conversions"
                   type="number"
                   min="0"
-                  value={formData.impressions}
-                  onChange={(e) => setFormData({ ...formData, impressions: e.target.value })}
-                  placeholder="50000"
+                  value={formData.conversions}
+                  onChange={(e) => setFormData({ ...formData, conversions: e.target.value })}
+                  placeholder="150"
                 />
               </div>
             </div>
+          </div>
+
+          <div className="border-t pt-4">
+            <h4 className="text-sm font-semibold mb-3 text-muted-foreground uppercase tracking-wide">
+              Revenue & Performance (Optional)
+            </h4>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+              <div className="space-y-2">
+                <Label htmlFor="revenue">Revenue ($)</Label>
+                <Input
+                  id="revenue"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={formData.revenue}
+                  onChange={(e) => setFormData({ ...formData, revenue: e.target.value })}
+                  placeholder="7500.00"
+                />
+              </div>
+            </div>
+
+            {(formData.totalSpend || formData.revenue || formData.clicks || formData.conversions) && (
+              <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                  Auto-Calculated Metrics
+                </div>
+                
+                {formData.totalSpend && formData.clicks && parseFloat(formData.totalSpend) > 0 && parseInt(formData.clicks) > 0 && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Cost Per Click (CPC)</span>
+                    <span className="text-sm font-semibold">
+                      ${(parseFloat(formData.totalSpend) / parseInt(formData.clicks)).toFixed(2)}
+                    </span>
+                  </div>
+                )}
+
+                {formData.conversions && formData.clicks && parseInt(formData.conversions) > 0 && parseInt(formData.clicks) > 0 && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Conversion Rate</span>
+                    <span className="text-sm font-semibold">
+                      {((parseInt(formData.conversions) / parseInt(formData.clicks)) * 100).toFixed(2)}%
+                    </span>
+                  </div>
+                )}
+
+                {formData.revenue && formData.totalSpend && parseFloat(formData.revenue) > 0 && parseFloat(formData.totalSpend) > 0 && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">ROAS (Return on Ad Spend)</span>
+                    <span className="text-sm font-semibold">
+                      {(parseFloat(formData.revenue) / parseFloat(formData.totalSpend)).toFixed(2)}x
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           <DialogFooter className="gap-2">

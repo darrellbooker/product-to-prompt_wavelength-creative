@@ -2,7 +2,8 @@ import { motion } from 'framer-motion'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Pencil, Trash, CalendarBlank, TrendUp, CurrencyDollar } from '@phosphor-icons/react'
+import { Separator } from '@/components/ui/separator'
+import { Pencil, Trash, CalendarBlank, TrendUp, CurrencyDollar, ChartBar } from '@phosphor-icons/react'
 import { ROICampaign, Client } from '@/types/campaign'
 import { format } from 'date-fns'
 
@@ -25,8 +26,22 @@ export function ROICampaignCard({ campaign, client, onEdit, onDelete }: ROICampa
     ? ((campaign.revenue - campaign.budget) / campaign.budget) * 100 
     : 0
   
+  const cpc = campaign.totalSpend && campaign.clicks && campaign.clicks > 0
+    ? campaign.totalSpend / campaign.clicks
+    : null
+  
+  const conversionRate = campaign.conversions && campaign.clicks && campaign.clicks > 0
+    ? (campaign.conversions / campaign.clicks) * 100
+    : null
+  
+  const roas = campaign.revenue && campaign.totalSpend && campaign.totalSpend > 0
+    ? campaign.revenue / campaign.totalSpend
+    : null
+  
   const isActive = new Date(campaign.startDate) <= new Date() && new Date(campaign.endDate) >= new Date()
   const isUpcoming = new Date(campaign.startDate) > new Date()
+
+  const hasMetrics = campaign.totalSpend || campaign.impressions || campaign.clicks || campaign.conversions
 
   return (
     <motion.div
@@ -70,8 +85,77 @@ export function ROICampaignCard({ campaign, client, onEdit, onDelete }: ROICampa
             <span className="text-muted-foreground">budget</span>
           </div>
 
+          {hasMetrics && (
+            <>
+              <Separator />
+              <div className="space-y-2">
+                <div className="flex items-center gap-1 text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  <ChartBar size={14} />
+                  <span>Results</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  {campaign.totalSpend !== undefined && (
+                    <div>
+                      <div className="text-muted-foreground">Spend</div>
+                      <div className="font-semibold">${campaign.totalSpend.toLocaleString()}</div>
+                    </div>
+                  )}
+                  {campaign.impressions !== undefined && (
+                    <div>
+                      <div className="text-muted-foreground">Impressions</div>
+                      <div className="font-semibold">{campaign.impressions.toLocaleString()}</div>
+                    </div>
+                  )}
+                  {campaign.clicks !== undefined && (
+                    <div>
+                      <div className="text-muted-foreground">Clicks</div>
+                      <div className="font-semibold">{campaign.clicks.toLocaleString()}</div>
+                    </div>
+                  )}
+                  {campaign.conversions !== undefined && (
+                    <div>
+                      <div className="text-muted-foreground">Conversions</div>
+                      <div className="font-semibold">{campaign.conversions.toLocaleString()}</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+
+          {(cpc !== null || conversionRate !== null || roas !== null) && (
+            <>
+              <Separator />
+              <div className="space-y-2 bg-muted/30 rounded-md p-2">
+                <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Calculated Metrics
+                </div>
+                <div className="space-y-1 text-xs">
+                  {cpc !== null && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">CPC</span>
+                      <span className="font-semibold">${cpc.toFixed(2)}</span>
+                    </div>
+                  )}
+                  {conversionRate !== null && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Conv. Rate</span>
+                      <span className="font-semibold">{conversionRate.toFixed(2)}%</span>
+                    </div>
+                  )}
+                  {roas !== null && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">ROAS</span>
+                      <span className="font-semibold">{roas.toFixed(2)}x</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+
           {campaign.revenue !== undefined && campaign.revenue > 0 && (
-            <div className="pt-3 border-t space-y-2">
+            <div className="pt-2 border-t space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Revenue</span>
                 <span className="font-semibold">${campaign.revenue.toLocaleString()}</span>
