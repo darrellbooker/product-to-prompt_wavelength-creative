@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { EmailTemplate } from '@/types/campaign'
+import { RichTextEditor } from '@/components/RichTextEditor'
 
 interface EmailTemplateFormDialogProps {
   open: boolean
@@ -52,9 +52,9 @@ export function EmailTemplateFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className="text-2xl">
             {editingTemplate ? 'Edit Template' : 'Create Email Template'}
           </DialogTitle>
         </DialogHeader>
@@ -97,21 +97,18 @@ export function EmailTemplateFormDialog({
 
           <div className="space-y-2">
             <Label htmlFor="email-body">Email Body *</Label>
-            <Textarea
-              id="email-body"
+            <RichTextEditor
               value={emailBody}
-              onChange={(e) => setEmailBody(e.target.value)}
-              placeholder="Enter your email content here..."
-              rows={12}
-              className="resize-none font-mono text-sm"
-              required
+              onChange={setEmailBody}
+              placeholder="Start building your email template with rich formatting..."
+              minHeight="450px"
             />
-            <p className="text-xs text-muted-foreground">
-              {emailBody.length} characters
+            <p className="text-xs text-muted-foreground mt-2">
+              Use the toolbar above to format your template with headings, lists, colors, images, and links
             </p>
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="gap-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>

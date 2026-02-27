@@ -47,6 +47,27 @@ This is a focused planning tool with create, read, update, and delete operations
 - **Progression**: Stats update in real-time as posts are added/removed/edited
 - **Success criteria**: Accurate counts, updates immediately, visually distinct presentation
 
+### Email Campaign Management
+- **Functionality**: Create, edit, and schedule email campaigns with rich text composition
+- **Purpose**: Centralize email marketing efforts alongside social media planning
+- **Trigger**: User switches to email tab and creates new campaign
+- **Progression**: Select email tab → Click new campaign → Choose client → Compose email with rich text editor → Set subject/preview text → Schedule send date → Save campaign
+- **Success criteria**: Rich formatting preserved, templates reusable, campaigns organized by date
+
+### Rich Text Email Composer
+- **Functionality**: Professional email editor with formatting toolbar (bold, italic, underline, headings, lists, colors, images, links)
+- **Purpose**: Create visually appealing marketing emails without HTML knowledge
+- **Trigger**: User composes email body in campaign or template form
+- **Progression**: Click in editor → Use toolbar to format text → Insert images/links via popover dialogs → Preview formatted result → Content saved as HTML
+- **Success criteria**: All formatting options work reliably, WYSIWYG preview accurate, formatting preserved when editing
+
+### Email Template Library
+- **Functionality**: Save frequently used email structures as reusable templates
+- **Purpose**: Accelerate email creation by reusing proven formats
+- **Trigger**: User creates template from scratch or saves campaign as template
+- **Progression**: Create template → Compose with rich editor → Save with descriptive name → Use template button on any future campaign → Template content populates form
+- **Success criteria**: Templates maintain all formatting, easy to find and apply, updates to template don't affect past campaigns
+
 ## Edge Case Handling
 
 - **Empty State**: Welcoming illustration and clear call-to-action when no posts exist yet
@@ -97,22 +118,28 @@ Animations should feel snappy and purposeful, reinforcing user actions without i
 ## Component Selection
 
 - **Components**:
-  - Dialog (shadcn) - For add/edit post forms, providing focused modal context
-  - Card (shadcn) - For displaying individual campaign posts with hover states
-  - Button (shadcn) - Primary actions with variant="default" for CTAs, variant="outline" for filters
-  - Input (shadcn) - For post content text entry
+  - Dialog (shadcn) - For add/edit post forms and email campaign composers, providing focused modal context
+  - Card (shadcn) - For displaying individual campaign posts, email campaigns, and templates with hover states
+  - Button (shadcn) - Primary actions with variant="default" for CTAs, variant="outline" for filters and toolbar buttons
+  - Input (shadcn) - For post content, subject lines, and URL entry
   - Textarea (shadcn) - For longer post content with character count
-  - Select (shadcn) - Platform picker with custom icons for each platform
-  - Calendar (shadcn) with Popover - Date picker for scheduling posts
-  - Badge (shadcn) - Platform tags and status indicators
+  - Select (shadcn) - Platform picker and client selector with custom display
+  - Calendar (shadcn) with Popover - Date picker for scheduling posts and emails
+  - Tabs (shadcn) - Switch between social media planner and email campaigns
+  - Badge (shadcn) - Platform tags, status indicators, and email status
   - Alert Dialog (shadcn) - Delete confirmation to prevent accidents
-  - Separator (shadcn) - Visual dividers between sections
+  - Separator (shadcn) - Visual dividers between sections and toolbar groups
+  - Popover (shadcn) - Color picker, link insertion, and image URL dialogs
+  - RichTextEditor (custom) - Professional email composer with formatting toolbar
 
 - **Customizations**:
   - Custom platform icons component using @phosphor-icons/react (TwitterLogo, InstagramLogo, FacebookLogo, LinkedinLogo, YoutubeLogo, TiktokLogo)
   - Custom stat cards with gradient backgrounds
   - Custom post card with elevated shadow on hover and smooth scale transform
   - Empty state illustration using SVG shapes
+  - Rich text editor with professional formatting toolbar (bold, italic, underline, headings H1-H3, bullet/numbered lists, text alignment, color picker, link insertion, image insertion, clear formatting)
+  - ContentEditable-based editor with real-time formatting preview
+  - Custom color picker popover with predefined palette and custom hex input
 
 - **States**:
   - Buttons: Default with shadow, hover with slight lift and brightness increase, active with pressed effect, disabled with reduced opacity
@@ -121,12 +148,22 @@ Animations should feel snappy and purposeful, reinforcing user actions without i
   - Platform Filters: Inactive with outline style, active with solid fill and icon color
 
 - **Icon Selection**:
-  - Plus (add new post)
-  - PencilSimple (edit post)
-  - Trash (delete post)
+  - Plus (add new post/campaign/template)
+  - PencilSimple (edit post/campaign/template)
+  - Trash (delete post/campaign/template)
   - CalendarBlank (date picker)
   - Funnel (filter indicator)
   - CheckCircle (published/completed status)
+  - Envelope (email campaigns tab)
+  - FileText (templates tab)
+  - ChatsCircle (social media tab)
+  - TextB, TextItalic, TextUnderline (text formatting)
+  - TextHOne, TextHTwo, TextHThree (heading levels)
+  - ListBullets, ListNumbers (list formatting)
+  - TextAlignLeft, TextAlignCenter, TextAlignRight (text alignment)
+  - PaintBucket (text color)
+  - Link, Image (content insertion)
+  - Code (clear formatting)
   - Social platform icons for platform selection
 
 - **Spacing**:
