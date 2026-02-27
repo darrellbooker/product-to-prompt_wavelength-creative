@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
+import { Toaster } from '@/components/ui/sonner'
 import { Plus, Funnel, ChatsCircle, Envelope } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { CampaignPost, Platform, Client } from '@/types/campaign'
@@ -141,8 +142,10 @@ function App() {
   }, [posts])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background">
-      <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8 max-w-7xl">
+    <>
+      <Toaster />
+      <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background">
+        <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8 max-w-7xl">
         <header className="mb-8">
           <div className="mb-6">
             <h1 className="text-4xl font-bold tracking-tight mb-2">
@@ -333,6 +336,7 @@ function App() {
         </AlertDialog>
       </div>
     </div>
+    </>
   )
 }
 
