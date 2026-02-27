@@ -1,5 +1,6 @@
 export type Platform = 'twitter' | 'instagram' | 'facebook' | 'linkedin' | 'youtube' | 'tiktok'
 export type PostStatus = 'draft' | 'scheduled' | 'posted'
+export type EmailStatus = 'draft' | 'scheduled' | 'sent'
 
 export interface Client {
   id: string
@@ -25,6 +26,36 @@ export interface CampaignPost {
   callToAction?: string
   media?: MediaAttachment[]
   createdBy?: {
+    login: string
+    avatarUrl?: string
+  }
+}
+
+export interface EmailTemplate {
+  id: string
+  name: string
+  subjectLine: string
+  previewText: string
+  emailBody: string
+  createdAt: string
+  updatedAt: string
+  createdBy: {
+    login: string
+    avatarUrl?: string
+  }
+}
+
+export interface EmailCampaign {
+  id: string
+  clientId: string
+  subjectLine: string
+  previewText: string
+  emailBody: string
+  sendDate: string
+  createdAt: string
+  status: EmailStatus
+  templateId?: string
+  createdBy: {
     login: string
     avatarUrl?: string
   }
