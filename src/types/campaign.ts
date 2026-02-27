@@ -14,8 +14,8 @@ export interface CampaignPost {
   createdAt: string
   clientId: string
   status: PostStatus
-  createdBy: {
+  createdBy?: {
     login: string
-    avatarUrl: string
+    avatarUrl?: string
   }
 }

@@ -103,26 +103,28 @@ export function PostCard({ post, onEdit, onDelete, client }: PostCardProps) {
               </Badge>
             )}
           </div>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="flex items-center gap-2">
-                  <Avatar className="h-5 w-5">
-                    <AvatarImage src={post.createdBy.avatarUrl} alt={post.createdBy.login} />
-                    <AvatarFallback className="text-[10px]">
-                      {post.createdBy.login.substring(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="text-xs text-muted-foreground">
-                    {post.createdBy.login}
-                  </span>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="text-xs">Created by {post.createdBy.login}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          {post.createdBy && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-2">
+                    <Avatar className="h-5 w-5">
+                      <AvatarImage src={post.createdBy.avatarUrl || ''} alt={post.createdBy.login || 'User'} />
+                      <AvatarFallback className="text-[10px]">
+                        {(post.createdBy.login || 'U').substring(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="text-xs text-muted-foreground">
+                      {post.createdBy.login}
+                    </span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="text-xs">Created by {post.createdBy.login}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
         </CardFooter>
       </Card>
     </motion.div>
