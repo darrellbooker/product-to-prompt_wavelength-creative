@@ -68,6 +68,13 @@ This is a focused planning tool with create, read, update, and delete operations
 - **Progression**: Create template → Compose with rich editor → Save with descriptive name → Use template button on any future campaign → Template content populates form
 - **Success criteria**: Templates maintain all formatting, easy to find and apply, updates to template don't affect past campaigns
 
+### Staff Culture Builder
+- **Functionality**: Create and manage employee profile cards with personal details to build stronger team relationships
+- **Purpose**: Help team members remember important personal details about colleagues, fostering better workplace connections
+- **Trigger**: User navigates to Staff Culture tab and clicks "Add Team Member"
+- **Progression**: Select staff tab → Click add member → Enter name and role → Add photo placeholder (initials or color) → Fill personal notes (family, hobbies, interests) → Save → Profile card displays in team grid
+- **Success criteria**: Profiles persist, easy to edit and update, searchable by name, cards display key info at a glance
+
 ## Edge Case Handling
 
 - **Empty State**: Welcoming illustration and clear call-to-action when no posts exist yet
@@ -157,6 +164,7 @@ Animations should feel snappy and purposeful, reinforcing user actions without i
   - Envelope (email campaigns tab)
   - FileText (templates tab)
   - ChatsCircle (social media tab)
+  - Users (staff culture tab)
   - TextB, TextItalic, TextUnderline (text formatting)
   - TextHOne, TextHTwo, TextHThree (heading levels)
   - ListBullets, ListNumbers (list formatting)

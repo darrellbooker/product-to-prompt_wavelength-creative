@@ -7,13 +7,14 @@ import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Toaster } from '@/components/ui/sonner'
-import { Plus, Funnel, ChatsCircle, Envelope } from '@phosphor-icons/react'
+import { Plus, Funnel, ChatsCircle, Envelope, Users } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { CampaignPost, Platform, Client } from '@/types/campaign'
 import { PostCard } from '@/components/PostCard'
 import { PostFormDialog } from '@/components/PostFormDialog'
 import { PlatformIcon, getPlatformName } from '@/components/PlatformIcon'
 import { EmailManager } from '@/components/EmailManager'
+import { StaffCultureManager } from '@/components/StaffCultureManager'
 import { cn } from '@/lib/utils'
 
 const platforms: Platform[] = ['twitter', 'instagram', 'facebook', 'linkedin', 'youtube', 'tiktok']
@@ -167,6 +168,10 @@ function App() {
               <Envelope size={18} />
               Email Campaigns
             </TabsTrigger>
+            <TabsTrigger value="staff" className="gap-2">
+              <Users size={18} />
+              Staff Culture
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="social" className="mt-0">
@@ -302,6 +307,10 @@ function App() {
 
           <TabsContent value="email" className="mt-0">
             <EmailManager clients={clients || []} />
+          </TabsContent>
+
+          <TabsContent value="staff" className="mt-0">
+            <StaffCultureManager />
           </TabsContent>
         </Tabs>
 
