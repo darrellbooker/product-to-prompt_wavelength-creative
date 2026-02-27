@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { PencilSimple, Trash } from '@phosphor-icons/react'
+import { PencilSimple, Trash, Image as ImageIcon, VideoCamera } from '@phosphor-icons/react'
 import { format, isPast } from 'date-fns'
 import { CampaignPost, Client } from '@/types/campaign'
 import { PlatformIcon, getPlatformName } from './PlatformIcon'
@@ -86,10 +86,56 @@ export function PostCard({ post, onEdit, onDelete, client }: PostCardProps) {
           </div>
         </CardHeader>
         
-        <CardContent className="pb-3">
+        <CardContent className="pb-3 space-y-3">
           <p className="text-sm leading-relaxed line-clamp-4">
             {post.content}
           </p>
+          
+          {post.media && post.media.length > 0 && (
+            <div className={cn(
+              'grid gap-2',
+              post.media.length === 1 && 'grid-cols-1',
+              post.media.length === 2 && 'grid-cols-2',
+              post.media.length >= 3 && 'grid-cols-2'
+            )}>
+              {post.media.slice(0, 4).map((item, index) => (
+                <div
+                  key={item.id}
+                  className={cn(
+                    'relative rounded-md overflow-hidden bg-muted border',
+                    post.media!.length === 1 && 'aspect-video',
+                    post.media!.length > 1 && 'aspect-square'
+                  )}
+                >
+                  {item.type === 'image' ? (
+                    <img
+                      src={item.url}
+                      alt={item.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-muted">
+                      <VideoCamera size={24} className="text-muted-foreground" />
+                    </div>
+                  )}
+                  {index === 3 && post.media!.length > 4 && (
+                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                      <span className="text-white font-semibold text-lg">
+                        +{post.media!.length - 4}
+                      </span>
+                    </div>
+                  )}
+                  <div className="absolute top-1 right-1">
+                    {item.type === 'image' ? (
+                      <ImageIcon size={16} weight="fill" className="text-white drop-shadow-lg" />
+                    ) : (
+                      <VideoCamera size={16} weight="fill" className="text-white drop-shadow-lg" />
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
         
         <CardFooter className="pt-3 border-t flex-col items-start gap-2">

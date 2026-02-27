@@ -6,6 +6,14 @@ export interface Client {
   name: string
 }
 
+export interface MediaAttachment {
+  id: string
+  url: string
+  type: 'image' | 'video'
+  name: string
+  size: number
+}
+
 export interface CampaignPost {
   id: string
   platform: Platform
@@ -14,6 +22,7 @@ export interface CampaignPost {
   createdAt: string
   clientId: string
   status: PostStatus
+  media?: MediaAttachment[]
   createdBy?: {
     login: string
     avatarUrl?: string
