@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
@@ -7,7 +7,7 @@ import { Separator } from '@/components/ui/separator'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Plus, Funnel } from '@phosphor-icons/react'
 import { toast } from 'sonner'
-import { CampaignPost, Platform } from '@/types/campaign'
+import { CampaignPost, Platform, Client } from '@/types/campaign'
 import { PostCard } from '@/components/PostCard'
 import { PostFormDialog } from '@/components/PostFormDialog'
 import { PlatformIcon, getPlatformName } from '@/components/PlatformIcon'
@@ -15,19 +15,55 @@ import { cn } from '@/lib/utils'
 
 const platforms: Platform[] = ['twitter', 'instagram', 'facebook', 'linkedin', 'youtube', 'tiktok']
 
+const defaultClients: Client[] = [
+  { id: '1', name: 'Acme Corp' },
+  { id: '2', name: 'TechStart Inc' },
+  { id: '3', name: 'Global Solutions' },
+  { id: '4', name: 'Innovate Labs' },
+  { id: '5', name: 'Digital Dynamics' },
+]
+
 function App() {
   const [posts, setPosts] = useKV<CampaignPost[]>('campaign-posts', [])
+  const [clients] = useKV<Client[]>('clients', defaultClients)
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingPost, setEditingPost] = useState<CampaignPost | undefined>()
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [filterPlatform, setFilterPlatform] = useState<Platform | 'all'>('all')
+  const [currentUser, setCurrentUser] = useState<{ login: string; avatarUrl: string }>({ login: 'user', avatarUrl: '' })
 
-  const handleSavePost = (postData: Omit<CampaignPost, 'id' | 'createdAt'>) => {
+  useEffect(() => {
+    window.spark.user().then((user) => {
+      setCurrentUser({
+        login: user?.login || 'user',
+        avatarUrl: user?.avatarUrl || '',
+      })
+    }).catch(() => {
+      setCurrentUser({ login: 'user', avatarUrl: '' })
+    })
+  }, [])
+
+  const handleSavePost = async (postData: Omit<CampaignPost, 'id' | 'createdAt' | 'createdBy'>) => {
+    let user = currentUser
+    if (!user || !user.login) {
+      try {
+        const userInfo = await window.spark.user()
+        user = { login: userInfo?.login || 'user', avatarUrl: userInfo?.avatarUrl || '' }
+      } catch {
+        user = { login: 'user', avatarUrl: '' }
+      }
+    }
+    
     if (editingPost) {
       setPosts((currentPosts) =>
         (currentPosts || []).map((p) =>
           p.id === editingPost.id
-            ? { ...postData, id: editingPost.id, createdAt: editingPost.createdAt }
+            ? { 
+                ...postData, 
+                id: editingPost.id, 
+                createdAt: editingPost.createdAt,
+                createdBy: editingPost.createdBy 
+              }
             : p
         )
       )
@@ -38,11 +74,19 @@ function App() {
         ...postData,
         id: crypto.randomUUID(),
         createdAt: new Date().toISOString(),
+        createdBy: {
+          login: user.login,
+          avatarUrl: user.avatarUrl,
+        },
       }
       setPosts((currentPosts) => [...(currentPosts || []), newPost])
       toast.success('Post created successfully')
     }
     setIsFormOpen(false)
+  }
+
+  const getClientById = (clientId: string): Client | undefined => {
+    return clients?.find((c) => c.id === clientId)
   }
 
   const handleEditPost = (post: CampaignPost) => {
@@ -222,6 +266,7 @@ function App() {
                     post={post}
                     onEdit={handleEditPost}
                     onDelete={handleDeletePost}
+                    client={getClientById(post.clientId)}
                   />
                 ))}
               </AnimatePresence>
@@ -240,6 +285,7 @@ function App() {
         }}
         onSave={handleSavePost}
         editingPost={editingPost}
+        clients={clients || []}
       />
 
       <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>

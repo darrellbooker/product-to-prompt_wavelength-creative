@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,29 +9,42 @@ import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { CalendarBlank } from '@phosphor-icons/react'
 import { format } from 'date-fns'
-import { CampaignPost, Platform } from '@/types/campaign'
+import { CampaignPost, Platform, Client, PostStatus } from '@/types/campaign'
 import { getPlatformName, PlatformIcon } from './PlatformIcon'
 import { cn } from '@/lib/utils'
 
 interface PostFormDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSave: (post: Omit<CampaignPost, 'id' | 'createdAt'>) => void
+  onSave: (post: Omit<CampaignPost, 'id' | 'createdAt' | 'createdBy'>) => void
   editingPost?: CampaignPost
+  clients: Client[]
 }
 
 const platforms: Platform[] = ['twitter', 'instagram', 'facebook', 'linkedin', 'youtube', 'tiktok']
 
-export function PostFormDialog({ open, onOpenChange, onSave, editingPost }: PostFormDialogProps) {
+export function PostFormDialog({ open, onOpenChange, onSave, editingPost, clients }: PostFormDialogProps) {
   const [platform, setPlatform] = useState<Platform>(editingPost?.platform || 'twitter')
   const [content, setContent] = useState(editingPost?.content || '')
   const [postDate, setPostDate] = useState<Date | undefined>(
     editingPost?.postDate ? new Date(editingPost.postDate) : undefined
   )
-  const [errors, setErrors] = useState<{ content?: string; postDate?: string }>({})
+  const [clientId, setClientId] = useState<string>(editingPost?.clientId || '')
+  const [status, setStatus] = useState<PostStatus>(editingPost?.status || 'draft')
+  const [errors, setErrors] = useState<{ content?: string; postDate?: string; clientId?: string }>({})
+
+  useEffect(() => {
+    if (editingPost) {
+      setPlatform(editingPost.platform)
+      setContent(editingPost.content)
+      setPostDate(new Date(editingPost.postDate))
+      setClientId(editingPost.clientId)
+      setStatus(editingPost.status)
+    }
+  }, [editingPost])
 
   const handleSave = () => {
-    const newErrors: { content?: string; postDate?: string } = {}
+    const newErrors: { content?: string; postDate?: string; clientId?: string } = {}
     
     if (!content.trim()) {
       newErrors.content = 'Content is required'
@@ -39,6 +52,10 @@ export function PostFormDialog({ open, onOpenChange, onSave, editingPost }: Post
     
     if (!postDate) {
       newErrors.postDate = 'Post date is required'
+    }
+
+    if (!clientId) {
+      newErrors.clientId = 'Client is required'
     }
     
     if (Object.keys(newErrors).length > 0) {
@@ -50,6 +67,8 @@ export function PostFormDialog({ open, onOpenChange, onSave, editingPost }: Post
       platform,
       content: content.trim(),
       postDate: postDate!.toISOString(),
+      clientId,
+      status,
     })
     
     handleClose()
@@ -59,6 +78,8 @@ export function PostFormDialog({ open, onOpenChange, onSave, editingPost }: Post
     setPlatform('twitter')
     setContent('')
     setPostDate(undefined)
+    setClientId('')
+    setStatus('draft')
     setErrors({})
     onOpenChange(false)
   }
@@ -77,6 +98,33 @@ export function PostFormDialog({ open, onOpenChange, onSave, editingPost }: Post
         
         <div className="space-y-4 py-4">
           <div className="space-y-2">
+            <Label htmlFor="client" className="text-xs uppercase tracking-wide font-medium">
+              Client
+            </Label>
+            <Select 
+              value={clientId} 
+              onValueChange={(value) => {
+                setClientId(value)
+                setErrors((prev) => ({ ...prev, clientId: undefined }))
+              }}
+            >
+              <SelectTrigger id="client" className={cn(errors.clientId && 'border-destructive')}>
+                <SelectValue placeholder="Select a client" />
+              </SelectTrigger>
+              <SelectContent>
+                {clients.map((client) => (
+                  <SelectItem key={client.id} value={client.id}>
+                    {client.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.clientId && (
+              <p className="text-sm text-destructive">{errors.clientId}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="platform" className="text-xs uppercase tracking-wide font-medium">
               Platform
             </Label>
@@ -93,6 +141,22 @@ export function PostFormDialog({ open, onOpenChange, onSave, editingPost }: Post
                     </div>
                   </SelectItem>
                 ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="status" className="text-xs uppercase tracking-wide font-medium">
+              Status
+            </Label>
+            <Select value={status} onValueChange={(value) => setStatus(value as PostStatus)}>
+              <SelectTrigger id="status">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="draft">Draft</SelectItem>
+                <SelectItem value="scheduled">Scheduled</SelectItem>
+                <SelectItem value="posted">Posted</SelectItem>
               </SelectContent>
             </Select>
           </div>
