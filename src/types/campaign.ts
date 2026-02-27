@@ -22,6 +22,7 @@ export interface CampaignPost {
   createdAt: string
   clientId: string
   status: PostStatus
+  callToAction?: string
   media?: MediaAttachment[]
   createdBy?: {
     login: string

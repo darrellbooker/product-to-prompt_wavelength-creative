@@ -90,6 +90,14 @@ export function PostCard({ post, onEdit, onDelete, client }: PostCardProps) {
           <p className="text-sm leading-relaxed line-clamp-4">
             {post.content}
           </p>
+
+          {post.callToAction && (
+            <div className="flex items-center gap-2 pt-2">
+              <Badge variant="secondary" className="text-xs font-medium px-3 py-1">
+                CTA: {post.callToAction}
+              </Badge>
+            </div>
+          )}
           
           {post.media && post.media.length > 0 && (
             <div className={cn(

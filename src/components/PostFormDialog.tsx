@@ -32,6 +32,7 @@ export function PostFormDialog({ open, onOpenChange, onSave, editingPost, client
   )
   const [clientId, setClientId] = useState<string>(editingPost?.clientId || '')
   const [status, setStatus] = useState<PostStatus>(editingPost?.status || 'draft')
+  const [callToAction, setCallToAction] = useState<string>(editingPost?.callToAction || '')
   const [media, setMedia] = useState<MediaAttachment[]>(editingPost?.media || [])
   const [errors, setErrors] = useState<{ content?: string; postDate?: string; clientId?: string }>({})
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -43,6 +44,7 @@ export function PostFormDialog({ open, onOpenChange, onSave, editingPost, client
       setPostDate(new Date(editingPost.postDate))
       setClientId(editingPost.clientId)
       setStatus(editingPost.status)
+      setCallToAction(editingPost.callToAction || '')
       setMedia(editingPost.media || [])
     }
   }, [editingPost])
@@ -114,6 +116,7 @@ export function PostFormDialog({ open, onOpenChange, onSave, editingPost, client
       postDate: postDate!.toISOString(),
       clientId,
       status,
+      callToAction: callToAction.trim() || undefined,
       media: media.length > 0 ? media : undefined,
     })
     
@@ -126,6 +129,7 @@ export function PostFormDialog({ open, onOpenChange, onSave, editingPost, client
     setPostDate(undefined)
     setClientId('')
     setStatus('draft')
+    setCallToAction('')
     setMedia([])
     setErrors({})
     onOpenChange(false)
@@ -227,6 +231,21 @@ export function PostFormDialog({ open, onOpenChange, onSave, editingPost, client
               <p className="text-sm text-destructive">{errors.content}</p>
             )}
             <p className="text-xs text-muted-foreground">{content.length} characters</p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="call-to-action" className="text-xs uppercase tracking-wide font-medium">
+              Call to Action <span className="text-muted-foreground font-normal">(Optional)</span>
+            </Label>
+            <Input
+              id="call-to-action"
+              placeholder="e.g. Learn More, Shop Now, Sign Up..."
+              value={callToAction}
+              onChange={(e) => setCallToAction(e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">
+              Add a compelling action for your audience to take
+            </p>
           </div>
 
           <div className="space-y-2">
