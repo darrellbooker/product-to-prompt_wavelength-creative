@@ -7,7 +7,7 @@ import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Toaster } from '@/components/ui/sonner'
-import { Plus, Funnel, ChatsCircle, Envelope, Users } from '@phosphor-icons/react'
+import { Plus, Funnel, ChatsCircle, Envelope, Users, ChartLineUp } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { CampaignPost, Platform, Client } from '@/types/campaign'
 import { PostCard } from '@/components/PostCard'
@@ -15,6 +15,7 @@ import { PostFormDialog } from '@/components/PostFormDialog'
 import { PlatformIcon, getPlatformName } from '@/components/PlatformIcon'
 import { EmailManager } from '@/components/EmailManager'
 import { StaffCultureManager } from '@/components/StaffCultureManager'
+import { ROIManager } from '@/components/ROIManager'
 import { cn } from '@/lib/utils'
 
 const platforms: Platform[] = ['twitter', 'instagram', 'facebook', 'linkedin', 'youtube', 'tiktok']
@@ -159,18 +160,22 @@ function App() {
         </header>
 
         <Tabs defaultValue="social" className="w-full">
-          <TabsList className="mb-6 w-full grid grid-cols-3 h-auto">
+          <TabsList className="mb-6 w-full grid grid-cols-2 sm:grid-cols-4 h-auto gap-1">
             <TabsTrigger value="social" className="gap-1 sm:gap-2 flex-col sm:flex-row h-auto py-2 sm:py-1.5">
               <ChatsCircle size={18} className="sm:size-4" />
-              <span className="text-xs sm:text-sm">Social Media</span>
+              <span className="text-xs sm:text-sm">Social</span>
             </TabsTrigger>
             <TabsTrigger value="email" className="gap-1 sm:gap-2 flex-col sm:flex-row h-auto py-2 sm:py-1.5">
               <Envelope size={18} className="sm:size-4" />
-              <span className="text-xs sm:text-sm">Email Campaigns</span>
+              <span className="text-xs sm:text-sm">Email</span>
+            </TabsTrigger>
+            <TabsTrigger value="roi" className="gap-1 sm:gap-2 flex-col sm:flex-row h-auto py-2 sm:py-1.5">
+              <ChartLineUp size={18} className="sm:size-4" />
+              <span className="text-xs sm:text-sm">ROI</span>
             </TabsTrigger>
             <TabsTrigger value="staff" className="gap-1 sm:gap-2 flex-col sm:flex-row h-auto py-2 sm:py-1.5">
               <Users size={18} className="sm:size-4" />
-              <span className="text-xs sm:text-sm">Staff Culture</span>
+              <span className="text-xs sm:text-sm">Staff</span>
             </TabsTrigger>
           </TabsList>
 
@@ -307,6 +312,10 @@ function App() {
 
           <TabsContent value="email" className="mt-0">
             <EmailManager clients={clients || []} />
+          </TabsContent>
+
+          <TabsContent value="roi" className="mt-0">
+            <ROIManager clients={clients || []} />
           </TabsContent>
 
           <TabsContent value="staff" className="mt-0">

@@ -60,3 +60,24 @@ export interface EmailCampaign {
     avatarUrl?: string
   }
 }
+
+export type ROIPlatform = 'Meta' | 'Google' | 'LinkedIn' | 'Email'
+
+export interface ROICampaign {
+  id: string
+  name: string
+  clientId: string
+  platform: ROIPlatform
+  budget: number
+  startDate: string
+  endDate: string
+  createdAt: string
+  createdBy: {
+    login: string
+    avatarUrl?: string
+  }
+  revenue?: number
+  conversions?: number
+  clicks?: number
+  impressions?: number
+}
