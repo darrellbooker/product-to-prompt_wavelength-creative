@@ -7,8 +7,9 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
-import { Plus, ChartLineUp, TrendUp, Target, CurrencyDollar, PencilSimple, Trash } from '@phosphor-icons/react'
+import { Plus, ChartLineUp, TrendUp, Target, CurrencyDollar, PencilSimple, Trash, Export } from '@phosphor-icons/react'
 import { toast } from 'sonner'
+import { downloadCSV } from '@/lib/csv-export'
 import { ROICampaign, ROIPlatform, Client } from '@/types/campaign'
 import { ROICampaignFormDialog } from './ROICampaignFormDialog'
 import { cn } from '@/lib/utils'
@@ -104,6 +105,61 @@ export function ROIManager({ clients }: ROIManagerProps) {
     setIsFormOpen(true)
   }
 
+  const handleExportROICSV = () => {
+    if (!filteredCampaigns.length) {
+      toast.error('No data to export')
+      return
+    }
+
+    const headers = [
+      'Campaign Name',
+      'Client',
+      'Platform',
+      'Budget',
+      'Start Date',
+      'End Date',
+      'Revenue',
+      'Total Spend',
+      'Impressions',
+      'Clicks',
+      'Conversions',
+      'CPC',
+      'Conversion Rate',
+      'ROAS',
+      'Created By',
+      'Created At'
+    ]
+
+    const rows = filteredCampaigns.map(campaign => {
+      const cpc = campaign.clicks && campaign.totalSpend ? (campaign.totalSpend / campaign.clicks).toFixed(2) : 'N/A'
+      const conversionRate = campaign.clicks && campaign.conversions ? ((campaign.conversions / campaign.clicks) * 100).toFixed(2) + '%' : 'N/A'
+      const roas = campaign.totalSpend && campaign.revenue ? (campaign.revenue / campaign.totalSpend).toFixed(2) : 'N/A'
+
+      return [
+        campaign.name,
+        getClientById(campaign.clientId)?.name || 'Unknown',
+        campaign.platform,
+        campaign.budget,
+        new Date(campaign.startDate).toLocaleDateString(),
+        new Date(campaign.endDate).toLocaleDateString(),
+        campaign.revenue || 0,
+        campaign.totalSpend || 0,
+        campaign.impressions || 0,
+        campaign.clicks || 0,
+        campaign.conversions || 0,
+        cpc,
+        conversionRate,
+        roas,
+        campaign.createdBy.login,
+        new Date(campaign.createdAt).toLocaleDateString()
+      ]
+    })
+
+    const timestamp = new Date().toISOString().split('T')[0]
+    downloadCSV(`roi-campaigns-${timestamp}.csv`, headers, rows)
+    toast.success('CSV exported successfully')
+  }
+
   const filteredCampaigns = useMemo(() => {
     const currentCampaigns = campaigns || []
     let filtered = currentCampaigns
@@ -158,14 +214,26 @@ export function ROIManager({ clients }: ROIManagerProps) {
               Track performance and return on investment for all campaigns
             </p>
           </div>
-          <Button 
-            onClick={handleNewCampaign}
-            size="lg"
-            className="shadow-lg hover:shadow-xl transition-shadow"
-          >
-            <Plus size={20} weight="bold" className="mr-2" />
-            Add Campaign
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              onClick={handleExportROICSV}
+              size="lg"
+              variant="outline"
+              disabled={!filteredCampaigns.length}
+              className="shadow-sm hover:shadow-md transition-shadow"
+            >
+              <Export size={20} weight="bold" className="mr-2" />
+              Export CSV
+            </Button>
+            <Button 
+              onClick={handleNewCampaign}
+              size="lg"
+              className="shadow-lg hover:shadow-xl transition-shadow"
+            >
+              <Plus size={20} weight="bold" className="mr-2" />
+              Add Campaign
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

@@ -6,8 +6,9 @@ import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
-import { Plus, MagnifyingGlass, UserCircle, SquaresFour, List, Clock, X } from '@phosphor-icons/react'
+import { Plus, MagnifyingGlass, UserCircle, SquaresFour, List, Clock, X, Export } from '@phosphor-icons/react'
 import { toast } from 'sonner'
+import { downloadCSV } from '@/lib/csv-export'
 import { StaffMember } from '@/types/staff'
 import { StaffMemberCard } from '@/components/StaffMemberCard'
 import { StaffDashboardCard } from '@/components/StaffDashboardCard'
@@ -80,6 +81,45 @@ export function StaffCultureManager() {
     )
   }
 
+  const handleExportStaffCSV = () => {
+    if (!filteredMembers.length) {
+      toast.error('No data to export')
+      return
+    }
+
+    const headers = [
+      'Name',
+      'Role',
+      'Last 1-on-1 Date',
+      'Next 1-on-1 Date',
+      'Ask About Next Time',
+      'Development Goals',
+      'Recent Wins',
+      'Family',
+      'Hobbies',
+      'Interests',
+      'Created At'
+    ]
+
+    const rows = filteredMembers.map(member => [
+      member.name,
+      member.role,
+      member.lastOneOnOneDate ? new Date(member.lastOneOnOneDate).toLocaleDateString() : 'Not set',
+      member.nextOneOnOneDate ? new Date(member.nextOneOnOneDate).toLocaleDateString() : 'Not scheduled',
+      member.askAboutNextTime || '',
+      member.developmentGoals?.join('; ') || '',
+      member.recentWins?.join('; ') || '',
+      member.personalNotes.family || '',
+      member.personalNotes.hobbies || '',
+      member.personalNotes.interests || '',
+      new Date(member.createdAt).toLocaleDateString()
+    ])
+
+    const timestamp = new Date().toISOString().split('T')[0]
+    downloadCSV(`staff-members-${timestamp}.csv`, headers, rows)
+    toast.success('CSV exported successfully')
+  }
+
   const filteredMembers = useMemo(() => {
     const currentMembers = staffMembers || []
     if (!searchQuery.trim()) {
@@ -134,14 +174,26 @@ export function StaffCultureManager() {
             Build stronger team connections with personal profiles
           </p>
         </div>
-        <Button 
-          onClick={handleNewMember}
-          size="lg"
-          className="shadow-lg hover:shadow-xl transition-shadow"
-        >
-          <Plus size={20} weight="bold" className="mr-2" />
-          Add Team Member
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            onClick={handleExportStaffCSV}
+            size="lg"
+            variant="outline"
+            disabled={!filteredMembers.length}
+            className="shadow-sm hover:shadow-md transition-shadow"
+          >
+            <Export size={20} weight="bold" className="mr-2" />
+            Export CSV
+          </Button>
+          <Button 
+            onClick={handleNewMember}
+            size="lg"
+            className="shadow-lg hover:shadow-xl transition-shadow"
+          >
+            <Plus size={20} weight="bold" className="mr-2" />
+            Add Team Member
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

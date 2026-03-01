@@ -6,8 +6,9 @@ import { Card } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
-import { Plus, Envelope, FileText } from '@phosphor-icons/react'
+import { Plus, Envelope, FileText, Export } from '@phosphor-icons/react'
 import { toast } from 'sonner'
+import { downloadCSV } from '@/lib/csv-export'
 import { EmailCampaign, EmailTemplate, Client } from '@/types/campaign'
 import { EmailCampaignCard } from './EmailCampaignCard'
 import { EmailCampaignList } from './EmailCampaignList'
@@ -185,6 +186,47 @@ export function EmailManager({ clients }: EmailManagerProps) {
     setIsTemplateFormOpen(true)
   }
 
+  const handleExportEmailCSV = () => {
+    if (!sortedCampaigns.length) {
+      toast.error('No data to export')
+      return
+    }
+
+    const headers = [
+      'Client',
+      'Subject Line',
+      'Preview Text',
+      'Send Date',
+      'Status',
+      'Recipients',
+      'Open Rate',
+      'Click Rate',
+      'Bounce Rate',
+      'Unsubscribe Rate',
+      'Created By',
+      'Created At'
+    ]
+
+    const rows = sortedCampaigns.map(campaign => [
+      getClientById(campaign.clientId)?.name || 'Unknown',
+      campaign.subjectLine,
+      campaign.previewText,
+      new Date(campaign.sendDate).toLocaleDateString(),
+      campaign.status,
+      campaign.recipients.length,
+      campaign.stats?.openRate ? `${campaign.stats.openRate}%` : 'N/A',
+      campaign.stats?.clickRate ? `${campaign.stats.clickRate}%` : 'N/A',
+      campaign.stats?.bounceRate ? `${campaign.stats.bounceRate}%` : 'N/A',
+      campaign.stats?.unsubscribeRate ? `${campaign.stats.unsubscribeRate}%` : 'N/A',
+      campaign.createdBy.login,
+      new Date(campaign.createdAt).toLocaleDateString()
+    ])
+
+    const timestamp = new Date().toISOString().split('T')[0]
+    downloadCSV(`email-campaigns-${timestamp}.csv`, headers, rows)
+    toast.success('CSV exported successfully')
+  }
+
   const getClientById = (clientId: string): Client | undefined => {
     return clients?.find((c) => c.id === clientId)
   }
@@ -219,6 +261,16 @@ export function EmailManager({ clients }: EmailManagerProps) {
           </TabsList>
 
           <div className="flex gap-2">
+            <Button 
+              onClick={handleExportEmailCSV} 
+              size="lg" 
+              variant="outline"
+              disabled={!sortedCampaigns.length}
+              className="flex-1 sm:flex-initial"
+            >
+              <Export size={20} weight="bold" className="mr-2" />
+              Export CSV
+            </Button>
             <Button onClick={handleNewCampaign} size="lg" className="flex-1 sm:flex-initial">
               <Plus size={20} weight="bold" className="mr-2" />
               New Campaign

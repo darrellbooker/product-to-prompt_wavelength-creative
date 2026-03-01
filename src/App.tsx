@@ -10,8 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Toaster } from '@/components/ui/sonner'
-import { Plus, Funnel, ChatsCircle, Envelope, Users, ChartLineUp, CalendarBlank, X, MagnifyingGlass } from '@phosphor-icons/react'
+import { Plus, Funnel, ChatsCircle, Envelope, Users, ChartLineUp, CalendarBlank, X, MagnifyingGlass, Export } from '@phosphor-icons/react'
 import { toast } from 'sonner'
+import { downloadCSV } from '@/lib/csv-export'
 import { CampaignPost, Platform, Client } from '@/types/campaign'
 import { PostCard } from '@/components/PostCard'
 import { PostFormDialog } from '@/components/PostFormDialog'
@@ -123,6 +124,39 @@ function App() {
     setIsFormOpen(true)
   }
 
+  const handleExportSocialCSV = () => {
+    if (!filteredPosts.length) {
+      toast.error('No data to export')
+      return
+    }
+
+    const headers = [
+      'Platform',
+      'Client',
+      'Content',
+      'Call to Action',
+      'Post Date',
+      'Status',
+      'Created At',
+      'Created By'
+    ]
+
+    const rows = filteredPosts.map(post => [
+      post.platform,
+      getClientById(post.clientId)?.name || 'Unknown',
+      post.content,
+      post.callToAction || '',
+      new Date(post.postDate).toLocaleDateString(),
+      post.status,
+      new Date(post.createdAt).toLocaleDateString(),
+      post.createdBy?.login || 'Unknown'
+    ])
+
+    const timestamp = new Date().toISOString().split('T')[0]
+    downloadCSV(`social-media-posts-${timestamp}.csv`, headers, rows)
+    toast.success('CSV exported successfully')
+  }
+
   const filteredPosts = useMemo(() => {
     const currentPosts = posts || []
     let filtered = currentPosts
@@ -223,14 +257,26 @@ function App() {
                     Organize and schedule your social media content
                   </p>
                 </div>
-                <Button 
-                  onClick={handleNewPost}
-                  size="lg"
-                  className="shadow-lg hover:shadow-xl transition-shadow"
-                >
-                  <Plus size={20} weight="bold" className="mr-2" />
-                  Add Post
-                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={handleExportSocialCSV}
+                    size="lg"
+                    variant="outline"
+                    disabled={!filteredPosts.length}
+                    className="shadow-sm hover:shadow-md transition-shadow"
+                  >
+                    <Export size={20} weight="bold" className="mr-2" />
+                    Export CSV
+                  </Button>
+                  <Button 
+                    onClick={handleNewPost}
+                    size="lg"
+                    className="shadow-lg hover:shadow-xl transition-shadow"
+                  >
+                    <Plus size={20} weight="bold" className="mr-2" />
+                    Add Post
+                  </Button>
+                </div>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
