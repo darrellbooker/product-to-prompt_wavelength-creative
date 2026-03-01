@@ -6,8 +6,11 @@ import { Card } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Toaster } from '@/components/ui/sonner'
-import { Plus, Funnel, ChatsCircle, Envelope, Users, ChartLineUp } from '@phosphor-icons/react'
+import { Plus, Funnel, ChatsCircle, Envelope, Users, ChartLineUp, CalendarBlank, X } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { CampaignPost, Platform, Client } from '@/types/campaign'
 import { PostCard } from '@/components/PostCard'
@@ -35,6 +38,9 @@ function App() {
   const [editingPost, setEditingPost] = useState<CampaignPost | undefined>()
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [filterPlatform, setFilterPlatform] = useState<Platform | 'all'>('all')
+  const [filterClient, setFilterClient] = useState<string>('all')
+  const [filterDateStart, setFilterDateStart] = useState<string>('')
+  const [filterDateEnd, setFilterDateEnd] = useState<string>('')
   const [currentUser, setCurrentUser] = useState<{ login: string; avatarUrl: string }>({ login: 'user', avatarUrl: '' })
 
   useEffect(() => {
@@ -118,14 +124,32 @@ function App() {
 
   const filteredPosts = useMemo(() => {
     const currentPosts = posts || []
-    const filtered = filterPlatform === 'all' 
-      ? currentPosts 
-      : currentPosts.filter((p) => p.platform === filterPlatform)
+    let filtered = currentPosts
+    
+    if (filterPlatform !== 'all') {
+      filtered = filtered.filter((p) => p.platform === filterPlatform)
+    }
+    
+    if (filterClient !== 'all') {
+      filtered = filtered.filter((p) => p.clientId === filterClient)
+    }
+    
+    if (filterDateStart) {
+      const startDate = new Date(filterDateStart)
+      startDate.setHours(0, 0, 0, 0)
+      filtered = filtered.filter((p) => new Date(p.postDate) >= startDate)
+    }
+    
+    if (filterDateEnd) {
+      const endDate = new Date(filterDateEnd)
+      endDate.setHours(23, 59, 59, 999)
+      filtered = filtered.filter((p) => new Date(p.postDate) <= endDate)
+    }
     
     return filtered.sort((a, b) => 
       new Date(a.postDate).getTime() - new Date(b.postDate).getTime()
     )
-  }, [posts, filterPlatform])
+  }, [posts, filterPlatform, filterClient, filterDateStart, filterDateEnd])
 
   const platformStats = useMemo(() => {
     const stats: Record<Platform, number> = {
@@ -228,37 +252,137 @@ function App() {
 
               <Separator />
 
-              <div className="flex items-center gap-2 flex-wrap">
-                <Funnel size={16} className="text-muted-foreground" />
-                <span className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-                  Filter:
-                </span>
-                <Button
-                  variant={filterPlatform === 'all' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setFilterPlatform('all')}
-                  className="h-9"
-                >
-                  All Platforms
-                </Button>
-                {platforms.map((platform) => (
-                  <Button
-                    key={platform}
-                    variant={filterPlatform === platform ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setFilterPlatform(platform)}
-                    className={cn(
-                      'h-9',
-                      filterPlatform === platform && 'shadow-md'
-                    )}
-                  >
-                    <PlatformIcon platform={platform} size={16} />
-                    <span className="ml-2 hidden sm:inline">
-                      {getPlatformName(platform)}
-                    </span>
-                  </Button>
-                ))}
-              </div>
+              <Card className="p-4 bg-muted/30">
+                <div className="flex items-center gap-2 mb-4">
+                  <Funnel size={18} className="text-primary" weight="duotone" />
+                  <h3 className="text-sm font-semibold uppercase tracking-wide">Filters</h3>
+                  {(filterPlatform !== 'all' || filterClient !== 'all' || filterDateStart || filterDateEnd) && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setFilterPlatform('all')
+                        setFilterClient('all')
+                        setFilterDateStart('')
+                        setFilterDateEnd('')
+                      }}
+                      className="ml-auto h-8 text-xs"
+                    >
+                      <X size={14} className="mr-1" />
+                      Clear All
+                    </Button>
+                  )}
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2 block">
+                      Platform
+                    </Label>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Button
+                        variant={filterPlatform === 'all' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setFilterPlatform('all')}
+                        className="h-9"
+                      >
+                        All Platforms
+                      </Button>
+                      {platforms.map((platform) => (
+                        <Button
+                          key={platform}
+                          variant={filterPlatform === platform ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setFilterPlatform(platform)}
+                          className={cn(
+                            'h-9',
+                            filterPlatform === platform && 'shadow-md'
+                          )}
+                        >
+                          <PlatformIcon platform={platform} size={16} />
+                          <span className="ml-2 hidden sm:inline">
+                            {getPlatformName(platform)}
+                          </span>
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="client-filter" className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2 block">
+                        Client
+                      </Label>
+                      <Select value={filterClient} onValueChange={setFilterClient}>
+                        <SelectTrigger id="client-filter" className="h-10">
+                          <SelectValue placeholder="All Clients" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Clients</SelectItem>
+                          {(clients || []).map((client) => (
+                            <SelectItem key={client.id} value={client.id}>
+                              {client.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="date-start" className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2 block">
+                        Start Date
+                      </Label>
+                      <div className="relative">
+                        <Input
+                          id="date-start"
+                          type="date"
+                          value={filterDateStart}
+                          onChange={(e) => setFilterDateStart(e.target.value)}
+                          className="h-10"
+                        />
+                        <CalendarBlank size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="date-end" className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2 block">
+                        End Date
+                      </Label>
+                      <div className="relative">
+                        <Input
+                          id="date-end"
+                          type="date"
+                          value={filterDateEnd}
+                          onChange={(e) => setFilterDateEnd(e.target.value)}
+                          className="h-10"
+                        />
+                        <CalendarBlank size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {(filterClient !== 'all' || filterDateStart || filterDateEnd) && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2 border-t">
+                      <span className="font-medium">Active filters:</span>
+                      {filterClient !== 'all' && (
+                        <span className="bg-primary/10 text-primary px-2 py-1 rounded-md text-xs font-medium">
+                          {clients?.find(c => c.id === filterClient)?.name}
+                        </span>
+                      )}
+                      {filterDateStart && (
+                        <span className="bg-primary/10 text-primary px-2 py-1 rounded-md text-xs font-medium">
+                          From: {new Date(filterDateStart).toLocaleDateString()}
+                        </span>
+                      )}
+                      {filterDateEnd && (
+                        <span className="bg-primary/10 text-primary px-2 py-1 rounded-md text-xs font-medium">
+                          To: {new Date(filterDateEnd).toLocaleDateString()}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </Card>
 
               {filteredPosts.length === 0 ? (
                 <div className="text-center py-20">
@@ -279,18 +403,37 @@ function App() {
                     </svg>
                   </div>
                   <h2 className="text-2xl font-semibold mb-2">
-                    {filterPlatform === 'all' ? 'No posts yet' : `No ${getPlatformName(filterPlatform)} posts`}
+                    {(posts || []).length === 0 
+                      ? 'No posts yet'
+                      : 'No posts match your filters'
+                    }
                   </h2>
                   <p className="text-muted-foreground mb-6">
-                    {filterPlatform === 'all' 
+                    {(posts || []).length === 0 
                       ? 'Get started by creating your first campaign post'
-                      : `Create a post for ${getPlatformName(filterPlatform)} to see it here`
+                      : 'Try adjusting your filter criteria to see more results'
                     }
                   </p>
-                  <Button onClick={handleNewPost} size="lg">
-                    <Plus size={20} weight="bold" className="mr-2" />
-                    Create Your First Post
-                  </Button>
+                  {(posts || []).length === 0 ? (
+                    <Button onClick={handleNewPost} size="lg">
+                      <Plus size={20} weight="bold" className="mr-2" />
+                      Create Your First Post
+                    </Button>
+                  ) : (
+                    <Button 
+                      onClick={() => {
+                        setFilterPlatform('all')
+                        setFilterClient('all')
+                        setFilterDateStart('')
+                        setFilterDateEnd('')
+                      }} 
+                      size="lg"
+                      variant="outline"
+                    >
+                      <X size={20} weight="bold" className="mr-2" />
+                      Clear All Filters
+                    </Button>
+                  )}
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
