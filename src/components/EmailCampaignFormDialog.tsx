@@ -168,7 +168,7 @@ export function EmailCampaignFormDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!clientId || !subjectLine.trim() || !emailBody.trim()) {
+    if (!clientId || !subjectLine.trim() || !emailBody.trim() || !sendDate) {
       toast.error('Please fill in all required fields')
       return
     }
@@ -178,21 +178,9 @@ export function EmailCampaignFormDialog({
       return
     }
 
-    if (scheduleMode && !sendDate) {
-      toast.error('Please select a send date and time')
-      return
-    }
-
-    let dateTime: Date
-    if (scheduleMode && sendDate) {
-      const [hours, minutes] = sendTime.split(':')
-      dateTime = new Date(sendDate)
-      dateTime.setHours(parseInt(hours), parseInt(minutes))
-    } else {
-      dateTime = new Date()
-    }
-
-    const campaignStatus: EmailStatus = scheduleMode ? 'scheduled' : editingCampaign ? status : 'draft'
+    const [hours, minutes] = sendTime.split(':')
+    const dateTime = new Date(sendDate)
+    dateTime.setHours(parseInt(hours), parseInt(minutes))
 
     onSave({
       clientId,
@@ -200,7 +188,7 @@ export function EmailCampaignFormDialog({
       previewText: previewText.trim(),
       emailBody: emailBody.trim(),
       sendDate: dateTime.toISOString(),
-      status: campaignStatus,
+      status,
       templateId: undefined,
       recipients: recipients,
       recipientListId: selectedListId !== 'none' ? selectedListId : undefined,
@@ -431,103 +419,51 @@ export function EmailCampaignFormDialog({
             </p>
           </div>
 
-          <Card className="p-5 bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    {scheduleMode ? (
-                      <Clock size={20} className="text-primary" weight="duotone" />
-                    ) : (
-                      <PaperPlaneTilt size={20} className="text-primary" weight="duotone" />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Send Date *</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      'w-full justify-start text-left font-normal',
+                      !sendDate && 'text-muted-foreground'
                     )}
-                    <h3 className="text-sm font-semibold uppercase tracking-wide">
-                      {scheduleMode ? 'Schedule Send' : 'Send Now'}
-                    </h3>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    {scheduleMode 
-                      ? 'Choose a specific date and time to send this email'
-                      : 'Email will be marked as ready to send immediately'
-                    }
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Label htmlFor="schedule-toggle" className="text-sm font-medium cursor-pointer">
-                    Schedule
-                  </Label>
-                  <Switch
-                    id="schedule-toggle"
-                    checked={scheduleMode}
-                    onCheckedChange={setScheduleMode}
+                  >
+                    <CalendarBlank className="mr-2" size={16} />
+                    {sendDate ? format(sendDate, 'PPP') : 'Pick a date'}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={sendDate}
+                    onSelect={setSendDate}
+                    initialFocus
                   />
-                </div>
-              </div>
-
-              {scheduleMode && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t">
-                  <div className="space-y-2">
-                    <Label>Date *</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            'w-full justify-start text-left font-normal',
-                            !sendDate && 'text-muted-foreground'
-                          )}
-                        >
-                          <CalendarBlank className="mr-2" size={16} />
-                          {sendDate ? format(sendDate, 'PPP') : 'Pick a date'}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={sendDate}
-                          onSelect={setSendDate}
-                          initialFocus
-                          disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="time">Time *</Label>
-                    <div className="relative">
-                      <Clock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" weight="duotone" />
-                      <Input
-                        id="time"
-                        type="time"
-                        value={sendTime}
-                        onChange={(e) => setSendTime(e.target.value)}
-                        className="pl-10"
-                        required={scheduleMode}
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
+                </PopoverContent>
+              </Popover>
             </div>
-          </Card>
+
+            <div className="space-y-2">
+              <Label htmlFor="time">Send Time *</Label>
+              <Input
+                id="time"
+                type="time"
+                value={sendTime}
+                onChange={(e) => setSendTime(e.target.value)}
+                required
+              />
+            </div>
+          </div>
 
           <DialogFooter className="gap-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
             <Button type="submit">
-              {scheduleMode ? (
-                <>
-                  <Clock size={18} className="mr-2" weight="bold" />
-                  Schedule Campaign
-                </>
-              ) : (
-                <>
-                  <PaperPlaneTilt size={18} className="mr-2" weight="bold" />
-                  {editingCampaign ? 'Update Campaign' : 'Create Campaign'}
-                </>
-              )}
+              {editingCampaign ? 'Update Campaign' : 'Create Campaign'}
             </Button>
           </DialogFooter>
         </form>
