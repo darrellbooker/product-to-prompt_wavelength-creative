@@ -1,15 +1,17 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useKV } from '@github/spark/hooks'
-import { AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
-import { Plus, ChartLineUp, TrendUp, Target, CurrencyDollar } from '@phosphor-icons/react'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Label } from '@/components/ui/label'
+import { Plus, ChartLineUp, TrendUp, Target, CurrencyDollar, PencilSimple, Trash } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { ROICampaign, ROIPlatform, Client } from '@/types/campaign'
-import { ROICampaignCard } from './ROICampaignCard'
 import { ROICampaignFormDialog } from './ROICampaignFormDialog'
+import { cn } from '@/lib/utils'
 
 interface ROIManagerProps {
   clients: Client[]
@@ -20,6 +22,7 @@ export function ROIManager({ clients }: ROIManagerProps) {
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingCampaign, setEditingCampaign] = useState<ROICampaign | undefined>()
   const [deleteId, setDeleteId] = useState<string | null>(null)
+  const [filterClient, setFilterClient] = useState<string>('all')
   const [currentUser, setCurrentUser] = useState<{ login: string; avatarUrl: string }>({ login: 'user', avatarUrl: '' })
 
   useEffect(() => {
@@ -101,12 +104,18 @@ export function ROIManager({ clients }: ROIManagerProps) {
     setIsFormOpen(true)
   }
 
-  const sortedCampaigns = useMemo(() => {
+  const filteredCampaigns = useMemo(() => {
     const currentCampaigns = campaigns || []
-    return currentCampaigns.sort((a, b) => 
+    let filtered = currentCampaigns
+
+    if (filterClient !== 'all') {
+      filtered = filtered.filter((c) => c.clientId === filterClient)
+    }
+
+    return filtered.sort((a, b) => 
       new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
     )
-  }, [campaigns])
+  }, [campaigns, filterClient])
 
   const stats = useMemo(() => {
     const currentCampaigns = campaigns || []
@@ -211,36 +220,165 @@ export function ROIManager({ clients }: ROIManagerProps) {
 
         <Separator />
 
-        {sortedCampaigns.length === 0 ? (
+        <div className="mb-4">
+          <Label htmlFor="client-filter" className="text-sm font-medium mb-2 block">
+            Filter by Client
+          </Label>
+          <Select value={filterClient} onValueChange={setFilterClient}>
+            <SelectTrigger id="client-filter" className="w-full sm:w-64">
+              <SelectValue placeholder="All Clients" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Clients</SelectItem>
+              {clients.map((client) => (
+                <SelectItem key={client.id} value={client.id}>
+                  {client.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {filteredCampaigns.length === 0 ? (
           <div className="text-center py-20">
             <div className="mb-6 flex justify-center">
               <ChartLineUp size={128} className="text-muted-foreground/20" weight="duotone" />
             </div>
             <h2 className="text-2xl font-semibold mb-2">
-              No campaigns yet
+              {(campaigns || []).length === 0
+                ? 'No campaigns yet'
+                : 'No campaigns match your filter'
+              }
             </h2>
             <p className="text-muted-foreground mb-6">
-              Start tracking your campaign ROI by creating your first campaign
+              {(campaigns || []).length === 0
+                ? 'Start tracking your campaign ROI by creating your first campaign'
+                : 'Try selecting a different client or clear the filter'
+              }
             </p>
-            <Button onClick={handleNewCampaign} size="lg">
-              <Plus size={20} weight="bold" className="mr-2" />
-              Create Your First Campaign
-            </Button>
+            {(campaigns || []).length === 0 ? (
+              <Button onClick={handleNewCampaign} size="lg">
+                <Plus size={20} weight="bold" className="mr-2" />
+                Create Your First Campaign
+              </Button>
+            ) : (
+              <Button onClick={() => setFilterClient('all')} size="lg" variant="outline">
+                Clear Filter
+              </Button>
+            )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <AnimatePresence mode="popLayout">
-              {sortedCampaigns.map((campaign) => (
-                <ROICampaignCard
-                  key={campaign.id}
-                  campaign={campaign}
-                  onEdit={handleEditCampaign}
-                  onDelete={handleDeleteCampaign}
-                  client={getClientById(campaign.clientId)}
-                />
-              ))}
-            </AnimatePresence>
-          </div>
+          <Card className="overflow-hidden">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Campaign Name</TableHead>
+                    <TableHead>Client</TableHead>
+                    <TableHead>Platform</TableHead>
+                    <TableHead className="text-right">Budget</TableHead>
+                    <TableHead className="text-right">Revenue</TableHead>
+                    <TableHead className="text-right">Spend</TableHead>
+                    <TableHead className="text-right">Impressions</TableHead>
+                    <TableHead className="text-right">Clicks</TableHead>
+                    <TableHead className="text-right">Conversions</TableHead>
+                    <TableHead className="text-right">CPC</TableHead>
+                    <TableHead className="text-right">Conv. Rate</TableHead>
+                    <TableHead className="text-right">ROAS</TableHead>
+                    <TableHead>Start Date</TableHead>
+                    <TableHead>End Date</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredCampaigns.map((campaign) => {
+                    const client = getClientById(campaign.clientId)
+                    const cpc = campaign.clicks && campaign.clicks > 0 && campaign.totalSpend
+                      ? campaign.totalSpend / campaign.clicks
+                      : 0
+                    const conversionRate = campaign.clicks && campaign.clicks > 0 && campaign.conversions
+                      ? (campaign.conversions / campaign.clicks) * 100
+                      : 0
+                    const roas = campaign.totalSpend && campaign.totalSpend > 0 && campaign.revenue
+                      ? campaign.revenue / campaign.totalSpend
+                      : 0
+
+                    return (
+                      <TableRow key={campaign.id}>
+                        <TableCell className="font-medium">{campaign.name}</TableCell>
+                        <TableCell>{client?.name || 'Unknown'}</TableCell>
+                        <TableCell>
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-muted text-sm">
+                            {campaign.platform}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-right font-medium">
+                          ${campaign.budget.toLocaleString()}
+                        </TableCell>
+                        <TableCell className="text-right font-medium text-green-600">
+                          ${(campaign.revenue || 0).toLocaleString()}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          ${(campaign.totalSpend || 0).toLocaleString()}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {campaign.impressions?.toLocaleString() || '-'}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {campaign.clicks?.toLocaleString() || '-'}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {campaign.conversions?.toLocaleString() || '-'}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {cpc > 0 ? `$${cpc.toFixed(2)}` : '-'}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {conversionRate > 0 ? `${conversionRate.toFixed(2)}%` : '-'}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {roas > 0 ? (
+                            <span className={cn(
+                              'font-medium',
+                              roas >= 1 ? 'text-green-600' : 'text-red-600'
+                            )}>
+                              {roas.toFixed(2)}x
+                            </span>
+                          ) : '-'}
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap">
+                          {new Date(campaign.startDate).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap">
+                          {new Date(campaign.endDate).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEditCampaign(campaign)}
+                              className="h-8 w-8 p-0"
+                            >
+                              <PencilSimple size={16} />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteCampaign(campaign.id)}
+                              className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                            >
+                              <Trash size={16} />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          </Card>
         )}
       </div>
 
