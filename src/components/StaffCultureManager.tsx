@@ -70,6 +70,16 @@ export function StaffCultureManager() {
     setIsFormOpen(true)
   }
 
+  const handleScheduleNext = (memberId: string, nextDate: string) => {
+    setStaffMembers((currentMembers) =>
+      (currentMembers || []).map((m) =>
+        m.id === memberId
+          ? { ...m, nextOneOnOneDate: nextDate || undefined }
+          : m
+      )
+    )
+  }
+
   const filteredMembers = useMemo(() => {
     const currentMembers = staffMembers || []
     if (!searchQuery.trim()) {
@@ -256,6 +266,7 @@ export function StaffCultureManager() {
                   key={member.id}
                   member={member}
                   onEdit={handleEditMember}
+                  onScheduleNext={handleScheduleNext}
                 />
               ) : (
                 <StaffMemberCard

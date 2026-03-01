@@ -4,6 +4,7 @@ export interface StaffMember {
   role: string
   avatarColor: string
   lastOneOnOneDate?: string
+  nextOneOnOneDate?: string
   askAboutNextTime?: string
   developmentGoals?: string[]
   recentWins?: string[]

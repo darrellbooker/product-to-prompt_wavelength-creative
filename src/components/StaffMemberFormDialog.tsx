@@ -42,6 +42,7 @@ export function StaffMemberFormDialog({
   const [role, setRole] = useState('')
   const [avatarColor, setAvatarColor] = useState(avatarColors[0])
   const [lastOneOnOneDate, setLastOneOnOneDate] = useState('')
+  const [nextOneOnOneDate, setNextOneOnOneDate] = useState('')
   const [askAboutNextTime, setAskAboutNextTime] = useState('')
   const [family, setFamily] = useState('')
   const [hobbies, setHobbies] = useState('')
@@ -57,6 +58,7 @@ export function StaffMemberFormDialog({
       setRole(editingMember.role)
       setAvatarColor(editingMember.avatarColor)
       setLastOneOnOneDate(editingMember.lastOneOnOneDate || '')
+      setNextOneOnOneDate(editingMember.nextOneOnOneDate || '')
       setAskAboutNextTime(editingMember.askAboutNextTime || '')
       setFamily(editingMember.personalNotes.family || '')
       setHobbies(editingMember.personalNotes.hobbies || '')
@@ -68,6 +70,7 @@ export function StaffMemberFormDialog({
       setRole('')
       setAvatarColor(avatarColors[Math.floor(Math.random() * avatarColors.length)])
       setLastOneOnOneDate('')
+      setNextOneOnOneDate('')
       setAskAboutNextTime('')
       setFamily('')
       setHobbies('')
@@ -88,6 +91,7 @@ export function StaffMemberFormDialog({
       role: role.trim(),
       avatarColor,
       lastOneOnOneDate: lastOneOnOneDate || undefined,
+      nextOneOnOneDate: nextOneOnOneDate || undefined,
       askAboutNextTime: askAboutNextTime.trim() || undefined,
       developmentGoals: developmentGoals.length > 0 ? developmentGoals : undefined,
       recentWins: recentWins.length > 0 ? recentWins : undefined,
@@ -191,6 +195,20 @@ export function StaffMemberFormDialog({
                     value={lastOneOnOneDate}
                     onChange={(e) => setLastOneOnOneDate(e.target.value)}
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="next-one-on-one">Next 1-on-1 Date</Label>
+                  <Input
+                    id="next-one-on-one"
+                    type="date"
+                    value={nextOneOnOneDate}
+                    onChange={(e) => setNextOneOnOneDate(e.target.value)}
+                    min={new Date().toISOString().split('T')[0]}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Schedule when your next 1-on-1 meeting will be
+                  </p>
                 </div>
 
                 <div className="space-y-2">

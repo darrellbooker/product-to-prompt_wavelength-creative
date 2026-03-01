@@ -1,14 +1,20 @@
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { PencilSimple, Calendar, Clock } from '@phosphor-icons/react'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { PencilSimple, Calendar, Clock, CalendarPlus, Check, X } from '@phosphor-icons/react'
 import { StaffMember } from '@/types/staff'
 import { cn } from '@/lib/utils'
+import { toast } from 'sonner'
 
 interface StaffDashboardCardProps {
   member: StaffMember
   onEdit: (member: StaffMember) => void
+  onScheduleNext: (memberId: string, nextDate: string) => void
 }
 
 function getInitials(name: string): string {
@@ -74,7 +80,9 @@ function getStatusInfo(days: number | null): {
   }
 }
 
-export function StaffDashboardCard({ member, onEdit }: StaffDashboardCardProps) {
+export function StaffDashboardCard({ member, onEdit, onScheduleNext }: StaffDashboardCardProps) {
+  const [isScheduleOpen, setIsScheduleOpen] = useState(false)
+  const [nextDate, setNextDate] = useState('')
   const daysSince = getDaysSinceLastMeeting(member.lastOneOnOneDate)
   const status = getStatusInfo(daysSince)
   
@@ -82,6 +90,23 @@ export function StaffDashboardCard({ member, onEdit }: StaffDashboardCardProps) 
     const date = new Date(dateString)
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
   }
+
+  const handleSchedule = () => {
+    if (nextDate) {
+      onScheduleNext(member.id, nextDate)
+      setNextDate('')
+      setIsScheduleOpen(false)
+      toast.success(`Next 1-on-1 scheduled for ${formatDate(nextDate)}`)
+    }
+  }
+
+  const handleClearSchedule = () => {
+    onScheduleNext(member.id, '')
+    toast.success('Scheduled 1-on-1 cleared')
+  }
+
+  const isNextDateUpcoming = member.nextOneOnOneDate && new Date(member.nextOneOnOneDate) > new Date()
+  const isNextDatePast = member.nextOneOnOneDate && new Date(member.nextOneOnOneDate) <= new Date()
 
   return (
     <motion.div
@@ -154,6 +179,99 @@ export function StaffDashboardCard({ member, onEdit }: StaffDashboardCardProps) 
               </div>
             </div>
           </div>
+
+          {member.nextOneOnOneDate && (
+            <div className={cn(
+              "rounded-lg p-3 border-2 flex items-center justify-between gap-2",
+              isNextDateUpcoming
+                ? "bg-blue-50 border-blue-300"
+                : "bg-muted border-muted-foreground/30"
+            )}>
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <CalendarPlus 
+                  size={20} 
+                  weight="duotone" 
+                  className={isNextDateUpcoming ? "text-blue-600" : "text-muted-foreground"}
+                />
+                <div className="flex-1 min-w-0">
+                  <div className={cn(
+                    "text-xs font-bold uppercase tracking-wider",
+                    isNextDateUpcoming ? "text-blue-700" : "text-muted-foreground"
+                  )}>
+                    {isNextDatePast ? 'Was Scheduled' : 'Next 1-on-1'}
+                  </div>
+                  <div className={cn(
+                    "text-sm font-semibold",
+                    isNextDateUpcoming ? "text-blue-700" : "text-muted-foreground"
+                  )}>
+                    {formatDate(member.nextOneOnOneDate)}
+                  </div>
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleClearSchedule}
+                className="h-7 w-7 p-0 flex-shrink-0"
+              >
+                <X size={14} />
+              </Button>
+            </div>
+          )}
+
+          <Popover open={isScheduleOpen} onOpenChange={setIsScheduleOpen}>
+            <PopoverTrigger asChild>
+              <Button 
+                variant="outline" 
+                className="w-full gap-2 border-2 border-primary/30 hover:border-primary/50 hover:bg-primary/5"
+              >
+                <CalendarPlus size={18} weight="duotone" />
+                {member.nextOneOnOneDate ? 'Reschedule' : 'Schedule'} Next 1-on-1
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 p-4" align="start">
+              <div className="space-y-3">
+                <div>
+                  <h4 className="font-semibold text-sm mb-1">Schedule Next 1-on-1</h4>
+                  <p className="text-xs text-muted-foreground">
+                    Set the date for your next 1-on-1 with {member.name}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor={`schedule-${member.id}`} className="text-xs">
+                    Meeting Date
+                  </Label>
+                  <Input
+                    id={`schedule-${member.id}`}
+                    type="date"
+                    value={nextDate}
+                    onChange={(e) => setNextDate(e.target.value)}
+                    min={new Date().toISOString().split('T')[0]}
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleSchedule}
+                    disabled={!nextDate}
+                    className="flex-1 gap-2"
+                  >
+                    <Check size={16} weight="bold" />
+                    Schedule
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setNextDate('')
+                      setIsScheduleOpen(false)
+                    }}
+                    className="flex-1"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
 
           {member.askAboutNextTime && (
             <div className="bg-accent/10 border border-accent/30 rounded-lg p-3">
