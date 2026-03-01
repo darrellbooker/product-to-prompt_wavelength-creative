@@ -15,10 +15,18 @@ export interface MediaAttachment {
   size: number
 }
 
+export interface PlatformContent {
+  platform: Platform
+  content: string
+  callToAction?: string
+}
+
 export interface CampaignPost {
   id: string
   platform: Platform
+  platforms?: Platform[]
   content: string
+  platformSpecificContent?: PlatformContent[]
   postDate: string
   createdAt: string
   clientId: string

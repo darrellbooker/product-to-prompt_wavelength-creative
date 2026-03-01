@@ -50,7 +50,7 @@ export function PostCard({ post, onEdit, onDelete, client }: PostCardProps) {
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between gap-2 mb-3">
             <div className="flex flex-col gap-2 flex-1">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <Badge variant="outline" className="text-xs font-medium">
                   {client?.name || 'Unknown Client'}
                 </Badge>
@@ -58,11 +58,35 @@ export function PostCard({ post, onEdit, onDelete, client }: PostCardProps) {
                   {(post.status || 'draft').charAt(0).toUpperCase() + (post.status || 'draft').slice(1)}
                 </Badge>
               </div>
-              <div className="flex items-center gap-2">
-                <PlatformIcon platform={post.platform} size={20} />
-                <span className="text-xs text-muted-foreground font-medium">
-                  {getPlatformName(post.platform)}
-                </span>
+              <div className="flex items-center gap-2 flex-wrap">
+                {post.platforms && post.platforms.length > 1 ? (
+                  <>
+                    {post.platforms.map((platform) => (
+                      <TooltipProvider key={platform}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-muted/50 border">
+                              <PlatformIcon platform={platform} size={16} />
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="text-xs">{getPlatformName(platform)}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    ))}
+                    <Badge variant="secondary" className="text-xs">
+                      {post.platforms.length} platforms
+                    </Badge>
+                  </>
+                ) : (
+                  <>
+                    <PlatformIcon platform={post.platform} size={20} />
+                    <span className="text-xs text-muted-foreground font-medium">
+                      {getPlatformName(post.platform)}
+                    </span>
+                  </>
+                )}
               </div>
             </div>
             <div className="flex gap-1">
@@ -87,9 +111,37 @@ export function PostCard({ post, onEdit, onDelete, client }: PostCardProps) {
         </CardHeader>
         
         <CardContent className="pb-3 space-y-3">
-          <p className="text-sm leading-relaxed line-clamp-4">
-            {post.content}
-          </p>
+          {post.platformSpecificContent && post.platformSpecificContent.length > 0 ? (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary" className="text-xs">
+                  Platform-specific content
+                </Badge>
+              </div>
+              {post.platformSpecificContent.slice(0, 2).map((pc) => (
+                <div key={pc.platform} className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <PlatformIcon platform={pc.platform} size={14} />
+                    <span className="text-xs font-medium text-muted-foreground">
+                      {getPlatformName(pc.platform)}
+                    </span>
+                  </div>
+                  <p className="text-sm leading-relaxed line-clamp-2 pl-5">
+                    {pc.content}
+                  </p>
+                </div>
+              ))}
+              {post.platformSpecificContent.length > 2 && (
+                <p className="text-xs text-muted-foreground pl-5">
+                  +{post.platformSpecificContent.length - 2} more platform variants
+                </p>
+              )}
+            </div>
+          ) : (
+            <p className="text-sm leading-relaxed line-clamp-4">
+              {post.content}
+            </p>
+          )}
 
           {post.callToAction && (
             <div className="flex items-center gap-2 pt-2">
