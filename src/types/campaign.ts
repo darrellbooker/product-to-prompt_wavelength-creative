@@ -53,6 +53,19 @@ export interface EmailTemplate {
   }
 }
 
+export interface RecipientListItem {
+  email: string
+  name?: string
+}
+
+export interface SavedRecipientList {
+  id: string
+  name: string
+  recipients: RecipientListItem[]
+  createdAt: string
+  updatedAt: string
+}
+
 export interface EmailCampaign {
   id: string
   clientId: string
@@ -63,6 +76,8 @@ export interface EmailCampaign {
   createdAt: string
   status: EmailStatus
   templateId?: string
+  recipients: RecipientListItem[]
+  recipientListId?: string
   createdBy: {
     login: string
     avatarUrl?: string

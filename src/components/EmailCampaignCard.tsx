@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { PencilSimple, Trash, Envelope, Clock, CheckCircle, CircleDashed } from '@phosphor-icons/react'
+import { PencilSimple, Trash, Envelope, Clock, CheckCircle, CircleDashed, Users } from '@phosphor-icons/react'
 import { EmailCampaign, Client } from '@/types/campaign'
 import { format } from 'date-fns'
 
@@ -114,6 +114,15 @@ export function EmailCampaignCard({ campaign, onEdit, onDelete, client }: EmailC
             <p className="text-sm text-muted-foreground line-clamp-3">
               {campaign.emailBody}
             </p>
+          </div>
+
+          <div>
+            <div className="flex items-center gap-2 py-2 px-3 bg-accent/10 rounded-lg border border-accent/20">
+              <Users size={16} className="text-accent" weight="duotone" />
+              <span className="text-sm font-medium">
+                {campaign.recipients?.length || 0} recipient{campaign.recipients?.length !== 1 ? 's' : ''}
+              </span>
+            </div>
           </div>
 
           <div className="pt-2 border-t">
