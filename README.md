@@ -47,10 +47,17 @@ This is the fastest path. Fork this repo into your own GitHub account, then cust
 | File / Folder | Description |
 |--------------|-------------|
 | `README.md` | You're reading it |
-| `PRD.md` | Product Requirements Document — full professional spec for the app |
-| `IMPLEMENTATION_GUIDE.md` | Step-by-step instructions to make each component production-ready |
-| `docs/` | Architecture diagrams, API integration guides, deployment instructions |
-| `sparks/` | All 4 Spark components with prompts and iteration history |
+| `PRD.md` | Product Requirements Document — professional spec for the full app |
+| `SECURITY.md` | Security policy for the project |
+| `src/` | Application source code (TypeScript + CSS) |
+| `index.html` | App entry point |
+| `components.json` | UI component configuration |
+| `spark.meta.json` | Spark project metadata |
+| `theme.json` | App theme/styling configuration |
+| `tailwind.config.js` | Tailwind CSS configuration |
+| `vite.config.ts` | Vite build configuration |
+| `package.json` | Project dependencies and scripts |
+| `LICENSE` | MIT license |
 
 ## 🛠 About the Build
 
