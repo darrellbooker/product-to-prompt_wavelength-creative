@@ -34,11 +34,21 @@ The workshop deck includes every prompt used to build each component, step by st
 Then open GitHub Spark and start with the first prompt from the Social Media Scheduler section. Each component builds on the last — it's one unified project, not separate apps.
 
 ### Want to Fork This and Make It Your Own?
+
 This is the fastest path. Fork this repo into your own GitHub account, then customize it for your business.
 
 1. Click the **Fork** button at the top right of this page
 2. Choose your GitHub account as the destination
 3. You now have your own copy — edit freely
+
+**Important:** Once forked, this project is no longer editable in GitHub Spark. To continue developing your forked version, use **GitHub Codespaces** — a full cloud-based VS Code editor with Copilot built in. No local setup required.
+
+1. Open your forked repo
+2. Click the green **"Code"** button
+3. Select **"Open with Codespaces"**
+4. Copilot will be available in the editor to help you write and modify code using natural language
+
+📖 [Using GitHub Copilot in Codespaces](https://docs.github.com/en/codespaces/reference/using-github-copilot-in-github-codespaces)
 
 **Built something better?** We'd love to see it. Submit a **pull request** to share your improvements back with the community. That's what open source is all about — we build together.
 
