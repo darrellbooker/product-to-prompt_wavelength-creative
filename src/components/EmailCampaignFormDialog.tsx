@@ -53,6 +53,10 @@ export function EmailCampaignFormDialog({
   const [newListName, setNewListName] = useState('')
   const [showSaveListDialog, setShowSaveListDialog] = useState(false)
   const [scheduleMode, setScheduleMode] = useState(false)
+  const [openRate, setOpenRate] = useState<string>('')
+  const [clickRate, setClickRate] = useState<string>('')
+  const [bounceRate, setBounceRate] = useState<string>('')
+  const [unsubscribeRate, setUnsubscribeRate] = useState<string>('')
 
   useEffect(() => {
     if (editingCampaign) {
@@ -67,6 +71,10 @@ export function EmailCampaignFormDialog({
       setRecipients(editingCampaign.recipients || [])
       setSelectedListId(editingCampaign.recipientListId || '')
       setScheduleMode(editingCampaign.status === 'scheduled')
+      setOpenRate(editingCampaign.stats?.openRate?.toString() || '')
+      setClickRate(editingCampaign.stats?.clickRate?.toString() || '')
+      setBounceRate(editingCampaign.stats?.bounceRate?.toString() || '')
+      setUnsubscribeRate(editingCampaign.stats?.unsubscribeRate?.toString() || '')
     } else if (prefillData) {
       setClientId('')
       setSubjectLine(prefillData.subjectLine)
@@ -78,6 +86,10 @@ export function EmailCampaignFormDialog({
       setRecipients([])
       setSelectedListId('')
       setScheduleMode(false)
+      setOpenRate('')
+      setClickRate('')
+      setBounceRate('')
+      setUnsubscribeRate('')
     } else {
       setClientId('')
       setSubjectLine('')
@@ -89,6 +101,10 @@ export function EmailCampaignFormDialog({
       setRecipients([])
       setSelectedListId('')
       setScheduleMode(false)
+      setOpenRate('')
+      setClickRate('')
+      setBounceRate('')
+      setUnsubscribeRate('')
     }
   }, [editingCampaign, prefillData, open])
 
@@ -182,6 +198,13 @@ export function EmailCampaignFormDialog({
     const dateTime = new Date(sendDate)
     dateTime.setHours(parseInt(hours), parseInt(minutes))
 
+    const stats = status === 'sent' ? {
+      openRate: openRate ? parseFloat(openRate) : undefined,
+      clickRate: clickRate ? parseFloat(clickRate) : undefined,
+      bounceRate: bounceRate ? parseFloat(bounceRate) : undefined,
+      unsubscribeRate: unsubscribeRate ? parseFloat(unsubscribeRate) : undefined,
+    } : undefined
+
     onSave({
       clientId,
       subjectLine: subjectLine.trim(),
@@ -192,6 +215,7 @@ export function EmailCampaignFormDialog({
       templateId: undefined,
       recipients: recipients,
       recipientListId: selectedListId !== 'none' ? selectedListId : undefined,
+      stats,
     })
   }
 
@@ -457,6 +481,74 @@ export function EmailCampaignFormDialog({
               />
             </div>
           </div>
+
+          {status === 'sent' && (
+            <Card className="p-4 bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <PaperPlaneTilt size={20} className="text-primary" weight="duotone" />
+                  <h3 className="text-sm font-semibold uppercase tracking-wide">Campaign Statistics</h3>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Enter performance metrics for this sent campaign (values in percentage)
+                </p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="open-rate">Open Rate (%)</Label>
+                    <Input
+                      id="open-rate"
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      max="100"
+                      value={openRate}
+                      onChange={(e) => setOpenRate(e.target.value)}
+                      placeholder="e.g., 24.5"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="click-rate">Click Rate (%)</Label>
+                    <Input
+                      id="click-rate"
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      max="100"
+                      value={clickRate}
+                      onChange={(e) => setClickRate(e.target.value)}
+                      placeholder="e.g., 3.2"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="bounce-rate">Bounce Rate (%)</Label>
+                    <Input
+                      id="bounce-rate"
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      max="100"
+                      value={bounceRate}
+                      onChange={(e) => setBounceRate(e.target.value)}
+                      placeholder="e.g., 1.5"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="unsubscribe-rate">Unsubscribe Rate (%)</Label>
+                    <Input
+                      id="unsubscribe-rate"
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      max="100"
+                      value={unsubscribeRate}
+                      onChange={(e) => setUnsubscribeRate(e.target.value)}
+                      placeholder="e.g., 0.3"
+                    />
+                  </div>
+                </div>
+              </div>
+            </Card>
+          )}
 
           <DialogFooter className="gap-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>

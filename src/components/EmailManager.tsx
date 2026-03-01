@@ -4,11 +4,13 @@ import { AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Separator } from '@/components/ui/separator'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Plus, Envelope, FileText } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { EmailCampaign, EmailTemplate, Client } from '@/types/campaign'
 import { EmailCampaignCard } from './EmailCampaignCard'
+import { EmailCampaignList } from './EmailCampaignList'
 import { EmailTemplateCard } from './EmailTemplateCard'
 import { EmailCampaignFormDialog } from './EmailCampaignFormDialog'
 import { EmailTemplateFormDialog } from './EmailTemplateFormDialog'
@@ -228,8 +230,8 @@ export function EmailManager({ clients }: EmailManagerProps) {
           </div>
         </div>
 
-        <TabsContent value="campaigns" className="mt-0">
-          <Card className="p-4 mb-6 bg-gradient-to-br from-accent/10 to-accent/5 border-accent/20">
+        <TabsContent value="campaigns" className="mt-0 space-y-6">
+          <Card className="p-4 bg-gradient-to-br from-accent/10 to-accent/5 border-accent/20">
             <div className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-1">
               Total Campaigns
             </div>
@@ -253,19 +255,15 @@ export function EmailManager({ clients }: EmailManagerProps) {
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <AnimatePresence mode="popLayout">
-                {sortedCampaigns.map((campaign) => (
-                  <EmailCampaignCard
-                    key={campaign.id}
-                    campaign={campaign}
-                    onEdit={handleEditCampaign}
-                    onDelete={handleDeleteCampaign}
-                    client={getClientById(campaign.clientId)}
-                  />
-                ))}
-              </AnimatePresence>
-            </div>
+            <>
+              <Separator />
+              <EmailCampaignList
+                campaigns={sortedCampaigns}
+                onEdit={handleEditCampaign}
+                onDelete={handleDeleteCampaign}
+                getClientById={getClientById}
+              />
+            </>
           )}
         </TabsContent>
 

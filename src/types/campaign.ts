@@ -82,6 +82,12 @@ export interface EmailCampaign {
     login: string
     avatarUrl?: string
   }
+  stats?: {
+    openRate?: number
+    clickRate?: number
+    bounceRate?: number
+    unsubscribeRate?: number
+  }
 }
 
 export type ROIPlatform = 'Meta' | 'Google' | 'LinkedIn' | 'Email'
