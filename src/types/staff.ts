@@ -3,6 +3,10 @@ export interface StaffMember {
   name: string
   role: string
   avatarColor: string
+  lastOneOnOneDate?: string
+  askAboutNextTime?: string
+  developmentGoals?: string[]
+  recentWins?: string[]
   personalNotes: {
     family?: string
     hobbies?: string

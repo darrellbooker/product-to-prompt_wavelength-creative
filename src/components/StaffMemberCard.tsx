@@ -2,7 +2,8 @@ import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { PencilSimple, Trash, UserCircle, Heart, Star, Users as UsersIcon } from '@phosphor-icons/react'
+import { Separator } from '@/components/ui/separator'
+import { PencilSimple, Trash, UserCircle, Heart, Star, Users as UsersIcon, Calendar, ChartLineUp, Lightbulb, Trophy } from '@phosphor-icons/react'
 import { StaffMember } from '@/types/staff'
 
 interface StaffMemberCardProps {
@@ -20,6 +21,11 @@ function getInitials(name: string): string {
 }
 
 export function StaffMemberCard({ member, onEdit, onDelete }: StaffMemberCardProps) {
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  }
+
   return (
     <motion.div
       layout
@@ -68,50 +74,148 @@ export function StaffMemberCard({ member, onEdit, onDelete }: StaffMemberCardPro
             </div>
           </div>
         </CardHeader>
+
+        {member.askAboutNextTime && (
+          <div className="px-6 pb-3">
+            <div className="bg-accent/20 border-l-4 border-accent rounded-md p-3">
+              <div className="flex items-start gap-2">
+                <Lightbulb size={20} weight="duotone" className="text-accent flex-shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs font-semibold text-accent uppercase tracking-wide mb-1">
+                    Ask About Next Time
+                  </div>
+                  <p className="text-sm leading-relaxed break-words text-foreground">
+                    {member.askAboutNextTime}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         <CardContent className="space-y-3 pt-3 border-t">
-          {member.personalNotes.family && (
+          {member.lastOneOnOneDate && (
             <div className="flex gap-2">
-              <UsersIcon size={18} weight="duotone" className="text-primary flex-shrink-0 mt-0.5" />
+              <Calendar size={18} weight="duotone" className="text-primary flex-shrink-0 mt-0.5" />
               <div className="flex-1 min-w-0">
                 <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
-                  Family
+                  Last 1-on-1
                 </div>
-                <p className="text-sm leading-relaxed break-words">
-                  {member.personalNotes.family}
+                <p className="text-sm font-medium">
+                  {formatDate(member.lastOneOnOneDate)}
                 </p>
               </div>
             </div>
           )}
-          {member.personalNotes.hobbies && (
-            <div className="flex gap-2">
-              <Heart size={18} weight="duotone" className="text-accent flex-shrink-0 mt-0.5" />
-              <div className="flex-1 min-w-0">
-                <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
-                  Hobbies
+
+          {member.developmentGoals && member.developmentGoals.length > 0 && (
+            <>
+              {member.lastOneOnOneDate && <Separator className="my-3" />}
+              <div className="flex gap-2">
+                <ChartLineUp size={18} weight="duotone" className="text-chart-2 flex-shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                    Development Goals
+                  </div>
+                  <ul className="space-y-1.5">
+                    {member.developmentGoals.map((goal, index) => (
+                      <li key={index} className="text-sm leading-relaxed break-words flex items-start gap-2">
+                        <span className="text-chart-2 mt-1 flex-shrink-0">•</span>
+                        <span>{goal}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <p className="text-sm leading-relaxed break-words">
-                  {member.personalNotes.hobbies}
-                </p>
               </div>
-            </div>
+            </>
           )}
-          {member.personalNotes.interests && (
-            <div className="flex gap-2">
-              <Star size={18} weight="duotone" className="text-chart-4 flex-shrink-0 mt-0.5" />
-              <div className="flex-1 min-w-0">
-                <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
-                  Interests
+
+          {member.recentWins && member.recentWins.length > 0 && (
+            <>
+              {(member.lastOneOnOneDate || (member.developmentGoals && member.developmentGoals.length > 0)) && (
+                <Separator className="my-3" />
+              )}
+              <div className="flex gap-2">
+                <Trophy size={18} weight="duotone" className="text-chart-4 flex-shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                    Recent Wins
+                  </div>
+                  <ul className="space-y-1.5">
+                    {member.recentWins.map((win, index) => (
+                      <li key={index} className="text-sm leading-relaxed break-words flex items-start gap-2">
+                        <span className="text-chart-4 mt-1 flex-shrink-0">•</span>
+                        <span>{win}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <p className="text-sm leading-relaxed break-words">
-                  {member.personalNotes.interests}
-                </p>
               </div>
-            </div>
+            </>
           )}
-          {!member.personalNotes.family && !member.personalNotes.hobbies && !member.personalNotes.interests && (
+
+          {(member.personalNotes.family || member.personalNotes.hobbies || member.personalNotes.interests) && (
+            <>
+              {(member.lastOneOnOneDate || 
+                (member.developmentGoals && member.developmentGoals.length > 0) || 
+                (member.recentWins && member.recentWins.length > 0)) && (
+                <Separator className="my-3" />
+              )}
+              
+              {member.personalNotes.family && (
+                <div className="flex gap-2">
+                  <UsersIcon size={18} weight="duotone" className="text-primary flex-shrink-0 mt-0.5" />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                      Family
+                    </div>
+                    <p className="text-sm leading-relaxed break-words">
+                      {member.personalNotes.family}
+                    </p>
+                  </div>
+                </div>
+              )}
+              
+              {member.personalNotes.hobbies && (
+                <div className="flex gap-2">
+                  <Heart size={18} weight="duotone" className="text-accent flex-shrink-0 mt-0.5" />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                      Hobbies
+                    </div>
+                    <p className="text-sm leading-relaxed break-words">
+                      {member.personalNotes.hobbies}
+                    </p>
+                  </div>
+                </div>
+              )}
+              
+              {member.personalNotes.interests && (
+                <div className="flex gap-2">
+                  <Star size={18} weight="duotone" className="text-chart-4 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                      Interests
+                    </div>
+                    <p className="text-sm leading-relaxed break-words">
+                      {member.personalNotes.interests}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
+          {!member.lastOneOnOneDate && 
+           !member.askAboutNextTime &&
+           (!member.developmentGoals || member.developmentGoals.length === 0) && 
+           (!member.recentWins || member.recentWins.length === 0) &&
+           !member.personalNotes.family && 
+           !member.personalNotes.hobbies && 
+           !member.personalNotes.interests && (
             <div className="flex items-center justify-center py-4 text-muted-foreground">
               <UserCircle size={32} weight="duotone" className="mr-2" />
-              <span className="text-sm">No personal notes yet</span>
+              <span className="text-sm">No information yet</span>
             </div>
           )}
         </CardContent>
