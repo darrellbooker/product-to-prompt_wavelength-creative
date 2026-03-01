@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Toaster } from '@/components/ui/sonner'
-import { Plus, Funnel, ChatsCircle, Envelope, Users, ChartLineUp, CalendarBlank, X } from '@phosphor-icons/react'
+import { Plus, Funnel, ChatsCircle, Envelope, Users, ChartLineUp, CalendarBlank, X, MagnifyingGlass } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { CampaignPost, Platform, Client } from '@/types/campaign'
 import { PostCard } from '@/components/PostCard'
@@ -41,6 +41,7 @@ function App() {
   const [filterClient, setFilterClient] = useState<string>('all')
   const [filterDateStart, setFilterDateStart] = useState<string>('')
   const [filterDateEnd, setFilterDateEnd] = useState<string>('')
+  const [searchQuery, setSearchQuery] = useState<string>('')
   const [currentUser, setCurrentUser] = useState<{ login: string; avatarUrl: string }>({ login: 'user', avatarUrl: '' })
 
   useEffect(() => {
@@ -146,10 +147,20 @@ function App() {
       filtered = filtered.filter((p) => new Date(p.postDate) <= endDate)
     }
     
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim()
+      filtered = filtered.filter((p) => {
+        const contentMatch = p.content.toLowerCase().includes(query)
+        const hashtagMatch = p.content.toLowerCase().match(/#\w+/g)?.some(tag => tag.includes(query))
+        const ctaMatch = p.callToAction?.toLowerCase().includes(query)
+        return contentMatch || hashtagMatch || ctaMatch
+      })
+    }
+    
     return filtered.sort((a, b) => 
       new Date(a.postDate).getTime() - new Date(b.postDate).getTime()
     )
-  }, [posts, filterPlatform, filterClient, filterDateStart, filterDateEnd])
+  }, [posts, filterPlatform, filterClient, filterDateStart, filterDateEnd, searchQuery])
 
   const platformStats = useMemo(() => {
     const stats: Record<Platform, number> = {
@@ -252,11 +263,37 @@ function App() {
 
               <Separator />
 
+              <div className="relative">
+                <MagnifyingGlass 
+                  size={20} 
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" 
+                  weight="duotone"
+                />
+                <Input
+                  id="search-posts"
+                  type="text"
+                  placeholder="Search posts by content or hashtags..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 h-12 text-base bg-card shadow-sm"
+                />
+                {searchQuery && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0"
+                  >
+                    <X size={16} />
+                  </Button>
+                )}
+              </div>
+
               <Card className="p-4 bg-muted/30">
                 <div className="flex items-center gap-2 mb-4">
                   <Funnel size={18} className="text-primary" weight="duotone" />
                   <h3 className="text-sm font-semibold uppercase tracking-wide">Filters</h3>
-                  {(filterPlatform !== 'all' || filterClient !== 'all' || filterDateStart || filterDateEnd) && (
+                  {(filterPlatform !== 'all' || filterClient !== 'all' || filterDateStart || filterDateEnd || searchQuery) && (
                     <Button
                       variant="ghost"
                       size="sm"
@@ -265,6 +302,7 @@ function App() {
                         setFilterClient('all')
                         setFilterDateStart('')
                         setFilterDateEnd('')
+                        setSearchQuery('')
                       }}
                       className="ml-auto h-8 text-xs"
                     >
@@ -361,9 +399,14 @@ function App() {
                     </div>
                   </div>
 
-                  {(filterClient !== 'all' || filterDateStart || filterDateEnd) && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2 border-t">
+                  {(filterClient !== 'all' || filterDateStart || filterDateEnd || searchQuery) && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2 border-t flex-wrap">
                       <span className="font-medium">Active filters:</span>
+                      {searchQuery && (
+                        <span className="bg-primary/10 text-primary px-2 py-1 rounded-md text-xs font-medium">
+                          Search: "{searchQuery}"
+                        </span>
+                      )}
                       {filterClient !== 'all' && (
                         <span className="bg-primary/10 text-primary px-2 py-1 rounded-md text-xs font-medium">
                           {clients?.find(c => c.id === filterClient)?.name}
@@ -426,6 +469,7 @@ function App() {
                         setFilterClient('all')
                         setFilterDateStart('')
                         setFilterDateEnd('')
+                        setSearchQuery('')
                       }} 
                       size="lg"
                       variant="outline"
